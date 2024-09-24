@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require("uuid");
 
 // Define allowed mime types for each file type
 const allowedMimeTypes = {
-  banner: ["image/jpeg", "image/png"],
+  banners: ["image/jpeg", "image/png"],
 };
 
 const storage = multer.diskStorage({
@@ -13,8 +13,8 @@ const storage = multer.diskStorage({
     let destinationPath;
 
     switch (file.fieldname) {
-      case "banner":
-        destinationPath = `./public/banner/`;
+      case "banners":
+        destinationPath = `./public/banners/`;
         break;
       default:
         return cb(new Error("Invalid fieldname"));
@@ -52,4 +52,7 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 
-module.exports = upload;
+// Change to allow multiple file uploads
+const uploadMultiple = upload.array("banners", 5); 
+
+module.exports = uploadMultiple;

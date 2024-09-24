@@ -18,7 +18,7 @@ const FormComponent = ({ onSubmit, fields }) => {
     };
 
     return (
-        <form className="flex flex-col   my-2 w-96 h-72 justify-center items-center gap-2 " onSubmit={handleSubmit}>
+        <form className="flex flex-col  p-4 h-48 justify-center items-center gap-2 " onSubmit={handleSubmit}>
             {fields.map((field) => (
               <TextField
               variant="outlined"

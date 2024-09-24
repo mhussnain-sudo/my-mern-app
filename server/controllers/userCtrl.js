@@ -49,28 +49,57 @@ const registerUser = async (req, res) => {
 //STEP 3 : login user
 const loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
-    const user = await Users.findOne({ email });
-    
-    if (!user) {
-      return res.status(401).json({ message: "Email incorrect", type: "error" });
-    }
-    
-    if (!bcrypt.compare(password, user.password)) {
-      return res.status(401).json({ message: "Password incorrect", type: "error" });
-    }
-    
-    if (user.status === "inactive") {
-      return res.status(403).json({ message: "Account is deactivated", type: "error" });
-    }
-    
-    const token = jwt.sign({ userId: user._id }, secretKey);
-    res.status(200).json({ message: "Login Successful", type: "success", token, userId: user._id });
+      const { email, password } = req.body;
+      const user = await Users.findOne({ email });
+      
+      if (!user) {
+          return res.status(401).json({ message: "Email incorrect", type: "error" });
+      }
+      
+      if (!bcrypt.compare(password, user.password)) {
+          return res.status(401).json({ message: "Password incorrect", type: "error" });
+      }
+      
+      if (user.status === "inactive") {
+          return res.status(403).json({ message: "Account is deactivated", type: "error" });
+      }
+      
+      const token = jwt.sign({ userId: user._id, role: user.role }, secretKey); // Include role in the token
+      const { password: _, ...userDetails } = user.toObject(); // Remove the password field
+
+      res.status(200).json({ 
+          message: "Login Successful", 
+          type: "success", 
+          token, 
+          user: userDetails
+      });
   } catch (error) {
-    res.status(500).json({ message: error.message, type: "error" });
+      res.status(500).json({ message: error.message, type: "error" });
   }
 };
 
+// logout user
+const logoutUser = async (req, res) => {
+  try {
+    const { userId } = req;
+
+    const user = await Users.findById(userId);
+
+    if (!user) {
+      throw new Error("user not found");
+    }
+
+    res.status(200).json({
+      message: "Logout successfully",
+      type: "success",
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: error.message,
+      type: "error",
+    });
+  }
+};
 
 //Get User Profie
 const userProfile = async (req, res) => {
@@ -111,33 +140,24 @@ const header = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized", type: "error" });
     }
 
-    const banner = req.file ? req.file.path : null; // Use multer to get the file path
-    if (!banner) {
-      return res.status(400).json({ message: "Banner image is required", type: "error" });
+    // Check if any files were uploaded
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: "At least one banner image is required", type: "error" });
     }
 
-    // Format the banner path for the database (remove 'public/' prefix)
-    const formattedBannerPath = banner.replace(/\\/g, "/").replace("public/", "");
+    // Map over the files and create a new Header document for each banner
+    const newHeaders = req.files.map(file => {
+      const formattedPath = file.path.replace(/\\/g, "/").replace("public/", ""); // Format the banner path
+      return new Header({ banner: formattedPath }); // Create a new Header instance
+    });
 
-    // Check if there's an existing banner to replace
-    const existingHeader = await Header.findOne(); // Adjust this if you have multiple headers
+    // Save all headers to the database
+    await Header.insertMany(newHeaders);
 
-    if (existingHeader) {
-      // If there's an existing banner, delete it from the filesystem
-      const previousBannerPath = path.join(__dirname, '..',"public/",existingHeader.banner);
-      if (fs.existsSync(previousBannerPath)) {
-        fs.unlinkSync(previousBannerPath);
-      }
-      // Update the existing header with the new banner path
-      existingHeader.banner = formattedBannerPath;
-      await existingHeader.save();
-      res.status(200).json({ message: "Banner updated successfully", type: "success", banner: formattedBannerPath });
-    } else {
-      // If no existing banner, create a new one
-      const newHeader = new Header({ banner: formattedBannerPath });
-      await newHeader.save();
-      res.status(200).json({ message: "Banner uploaded successfully", type: "success", banner: formattedBannerPath });
-    }
+    res.status(200).json({
+      message: "Banners uploaded successfully",
+      type: "success",
+    });
   } catch (error) {
     res.status(500).json({ error: error.message, type: "error" });
   }
@@ -145,20 +165,24 @@ const header = async (req, res) => {
 
 const getheader = async (req, res) => {
   try {
-    const header = await Header.findOne(); // Adjust if you have multiple headers
+      const headers = await Header.find(); // Fetch all headers
 
-    if (!header) {
-      return res.status(404).json({ message: "Header not found", type: "error" });
-    }
+      if (!headers.length) {
+          return res.status(404).json({ message: "No headers found", type: "error" });
+      }
 
-    // Prepend the public prefix to the banner path for the frontend
-    header.banner = `/public/${header.banner}`;
+      // Prepend the public prefix to the banner path for the frontend
+      const headersWithPath = headers.map(header => ({
+          ...header._doc,
+          banner: `/public/${header.banner}`
+      }));
 
-    res.status(200).json({ message: "Header retrieved successfully", type: "success", header });
+      res.status(200).json({ message: "Headers retrieved successfully", type: "success", headers: headersWithPath });
   } catch (error) {
-    res.status(500).json({ message: error.message, type: "error" });
+      res.status(500).json({ message: error.message, type: "error" });
   }
 };
+
 
 const addClub = async (req, res) => {
   const userId = req.userId;
@@ -219,6 +243,7 @@ module.exports = {
   role,
   registerUser,
   loginUser,
+  logoutUser,
   userProfile,
   header,
   getheader,
