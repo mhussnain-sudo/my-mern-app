@@ -25,7 +25,7 @@ export const logout = async () => {
 
 export const postHeader = async (formData) => {
   try {
-      const token = localStorage.getItem('token'); // Retrieve the token from local storage or your state management
+      const token = localStorage.getItem('token');
       const response = await api.post('/users/upload-banner', formData, {
           headers: {
               'Content-Type': 'multipart/form-data',
@@ -59,11 +59,48 @@ export const getheaders = async () => {
   }
 };
 
-  export const getAllClubs = async () => {
-    try {
-      const response = await api.get('/users/all-Clubs');
-      return response.data;
-    } catch (error) {
+export const getAllClubs = async (page = 1, limit = 10) => {
+  try {
+      const response = await api.get(`/users/all-Clubs?page=${page}&limit=${limit}`);
+      return response.data; // Ensure your API returns { clubs: [], totalPages: number }
+  } catch (error) {
       throw error.response.data; 
+  }
+};
+
+export const addClub = async (clubName, ownerName, email, password, clubAvatar) => {
+  try {
+      const token = localStorage.getItem('token');
+      const formData = new FormData(); // Create a FormData object
+      formData.append('clubName', clubName);
+      formData.append('ownerName', ownerName);
+      formData.append('email', email);
+      formData.append('password', password);
+      if (clubAvatar) {
+          formData.append('clubAvatar', clubAvatar); // Append the avatar file
+      }
+
+      const response = await api.post('/users/add-Club', formData, {
+          headers: {
+              Authorization: `Bearer ${token}`,
+              'Content-Type': 'multipart/form-data' // Set content type for FormData
+          }
+      });
+      return response.data;
+  } catch (error) {
+      throw error.response.data; // Log the error message
+  }
+};
+export const deleteClub = async ()=>{
+    try {
+        const token = localStorage.getItem('token');
+        const response = await api.delete('/users/delete-club', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response.data; // Log the error message
     }
-  };
+}

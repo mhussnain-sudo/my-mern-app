@@ -198,19 +198,22 @@ const addClub = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized", type: "error" });
     }
 
-    const { ownerName, clubName,email,password,} = req.body;
+    const { ownerName, clubName, email, password } = req.body;
 
     // Validate required fields
     if (!ownerName || !clubName || !email || !password) {
       return res.status(400).json({ message: "All fields are required", type: "error" });
     }
 
+
+
     // Create a new club
     const newClub = new Club({
       ownerName,
       clubName,
       email,
-      password
+      password,
+      clubAvatar: req.file ? `clubAvatar/${req.file.filename}` : null, // Save the filename from multer
     });
 
     // Save the new club to the database
@@ -224,20 +227,46 @@ const addClub = async (req, res) => {
 
 const getAllClubs = async (req, res) => {
   try {
-    // Fetch all clubs from the database
-    const clubs = await Club.find();
+      const { page = 1, limit = 15 } = req.query;
 
-    // Check if clubs exist
-    if (clubs.length === 0) {
-      return res.status(404).json({ message: "No clubs found", type: "info" });
-    }
+      const pageNumber = parseInt(page);
+      const limitNumber = parseInt(limit);
+      const skip = (pageNumber - 1) * limitNumber;
 
-    // Return the list of clubs
-    res.status(200).json({ message: "Clubs retrieved successfully", type: "success", clubs });
+      // Fetch clubs with pagination
+      const clubs = await Club.find()
+        .skip(skip)
+        .limit(limitNumber)
+        .select('clubName ownerName email password clubAvatar');
+
+      const totalClubs = await Club.countDocuments();
+
+      if (clubs.length === 0) {
+          return res.status(404).json({ message: "No clubs found", type: "info" });
+      }
+
+      // Map over clubs to add public prefix to clubAvatar
+      const clubsWithAvatar = clubs.map(club => ({
+          ...club.toObject(), // Convert mongoose document to plain object
+          clubAvatar: club.clubAvatar ? `/public/${club.clubAvatar}` : null, // Add prefix
+      }));
+
+      res.status(200).json({
+          message: "Clubs retrieved successfully",
+          type: "success",
+          data: {
+              clubs: clubsWithAvatar,
+              currentPage: pageNumber,
+              totalPages: Math.ceil(totalClubs / limitNumber),
+              totalItems: totalClubs,
+          }
+      });
   } catch (error) {
-    res.status(500).json({ error: error.message, type: "error" });
+      res.status(500).json({ error: error.message, type: "error" });
   }
 };
+
+
 
 module.exports = {
   role,

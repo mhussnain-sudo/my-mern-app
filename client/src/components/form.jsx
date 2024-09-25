@@ -14,26 +14,27 @@ const FormComponent = ({ onSubmit, fields }) => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit(formData);
+        onSubmit(formData); // Pass only form data
+        setFormData({}); // Reset form data after submission
     };
 
     return (
-        <form className="flex flex-col  p-4 h-48 justify-center items-center gap-2 " onSubmit={handleSubmit}>
+        <form className="flex flex-col  p-4  justify-center items-center gap-2" onSubmit={handleSubmit}>
             {fields.map((field) => (
-              <TextField
-              variant="outlined"
-              size="small"
-              key={field.name}
-              type={field.type}
-              name={field.name}
-              label={field.placeholder} // Add label for accessibility
-              value={formData[field.name] || ''}
-              onChange={handleChange}
-              required
-              className="w-72"
-          />
+                <TextField
+                    variant="outlined"
+                    size="small"
+                    key={field.name}
+                    type={field.type}
+                    name={field.name}
+                    label={field.placeholder}
+                    value={formData[field.name] || ''}
+                    onChange={handleChange}
+                    required
+                    className="w-72"
+                />
             ))}
-           <Button variant="contained" type="submit">Submit</Button>
+            <Button variant="contained" type="submit">Submit</Button>
         </form>
     );
 };

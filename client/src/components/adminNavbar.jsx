@@ -22,7 +22,7 @@ export default function AdminNavbar() {
         <div>
         <div className="flex flex-row justify-between gap-5 p-4 bg-slate-100">
                 <div className="px-28">
-                    <h2 className="text-2xl">Pigeon</h2>
+                    <h2 className="text-2xl">SONA PUNJAB</h2>
                 </div>
                 <div>
                     <Button onClick={logoutUser}>LOGOUT</Button>
