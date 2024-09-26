@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require("uuid");
 const allowedMimeTypes = {
   banners: ["image/jpeg", "image/png"],
   clubAvatar: ["image/jpeg", "image/png"],
+  tournamentImage: ["image/jpeg", "image/png"],
 };
 
 const storage = multer.diskStorage({
@@ -20,6 +21,10 @@ const storage = multer.diskStorage({
         case "clubAvatar":
           destinationPath = `./public/clubAvatar/`;
           break;
+        case "tournamentImage":
+          destinationPath = `./public/tournamentImage/`;
+          break;
+        // Add more file types as needed...
       default:
         return cb(new Error("Invalid fieldname"));
     }
@@ -48,6 +53,7 @@ const fileFilter = (req, file, cb) => {
   }
 };
 
+
 const upload = multer({
   storage: storage,
   limits: {
@@ -59,4 +65,5 @@ const upload = multer({
 // Change to allow multiple file uploads
 const uploadMultiple = upload.array("banners", 5); 
 const uploadclubAvatar = upload.single("clubAvatar");
-module.exports = {uploadMultiple,uploadclubAvatar};
+const uploadtournamentImage = upload.single("tournamentImage");
+module.exports = {uploadMultiple,uploadclubAvatar,uploadtournamentImage};

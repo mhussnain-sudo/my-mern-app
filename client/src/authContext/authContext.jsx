@@ -28,7 +28,13 @@ export const AuthProvider = ({ children }) => {
                 const { token, user } = response.data;
                 localStorage.setItem('token', token);
                 setUser({ id: user._id, role: user.role });
-                navigate(user.role === "admin" ? '/admin-dashboard' : '/');
+               if(user.role === "admin") {
+                    navigate('/admin-dashboard'); 
+               }else if(user.role === "clubowner"){
+                     navigate('/clubowner-dashboard'); 
+               }else{
+                 navigate('/');
+               }
             } else {
                 console.error(response.data.message);
             }

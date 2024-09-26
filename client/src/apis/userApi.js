@@ -104,3 +104,72 @@ export const deleteClub = async ()=>{
         throw error.response.data; // Log the error message
     }
 }
+
+export const addTournament = async (formData)=>{
+    try {
+        const token = localStorage.getItem('token');
+        const response = await api.post(`/users/add-Tournament`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data', // For file uploads
+              Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+}
+
+export const getAllTournaments = async (page = 1, limit = 10) => {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await api.get(`/users/all-Tournaments?page=${page}&limit=${limit}`, {
+            
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+        
+    } catch (error) {
+        throw error.response.data;
+    }
+}
+
+export const deleteTournaments = async ()=>{
+    try {
+        const token = localStorage.getItem('token');
+        const response = await api.delete('/users/delete-club', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response.data; // Log the error message
+    }
+}
+
+export const addPigeonOwner = async (tournamentName, name, phone, city, pigeonAvatar) => {
+    try {
+        const token = localStorage.getItem('token');
+        const formData = new FormData(); // Create a FormData object
+        formData.append('tournamentName',tournamentName);
+        formData.append('name', name);
+        formData.append('phone', phone);
+        formData.append('city', city);
+        if (pigeonAvatar) {
+            formData.append('pigeonAvatar', pigeonAvatar); // Append the avatar file
+        }
+  
+        const response = await api.post('/users/add-pigeonOwner', formData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data' // Set content type for FormData
+            }
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response.data; // Log the error message
+    }
+  };

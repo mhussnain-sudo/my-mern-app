@@ -66,15 +66,15 @@ export default function Sidebar() {
                     <MenuItems className=" absolute w-max mt-2 bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                         <div className="py-1">
                             <MenuItem>
-                                <Link to="/all-PigeonsOwners" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-100">
-                                    All Pigeon Owners
+                                <Link to="/add-PigeonsResult" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-100">
+                                    Add Pigeons Result
                                 </Link>
                             </MenuItem>
                         </div>
                         <div className="py-1">
                             <MenuItem>
                                 <Link to="/create-PigeonsOwners" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-100">
-                                    Create Pigeon Owners
+                                    Add Pigeons Owners
                                 </Link>
                             </MenuItem>
                         </div>

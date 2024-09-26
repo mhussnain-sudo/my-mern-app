@@ -2,12 +2,14 @@ const mongoose = require("mongoose");
 const Users = require("../models/userModel");
 const Club = require("../models/clubs");
 const Header = require("../models/header");
+const Tournament = require("../models/tournament");
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
 const path = require("path");
 const { setRole, getRole, clearRole } = require("../utils/roleStorage");
 const secretKey = process.env.JWT_SECRET;
+
 
 // STEP 1 : register user Role first
 const role = async (req, res) => {
@@ -51,26 +53,28 @@ const loginUser = async (req, res) => {
   try {
       const { email, password } = req.body;
       const user = await Users.findOne({ email });
-      
+
       if (!user) {
           return res.status(401).json({ message: "Email incorrect", type: "error" });
       }
-      
-      if (!bcrypt.compare(password, user.password)) {
+
+      // Await the password comparison
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
           return res.status(401).json({ message: "Password incorrect", type: "error" });
       }
-      
+
       if (user.status === "inactive") {
           return res.status(403).json({ message: "Account is deactivated", type: "error" });
       }
-      
-      const token = jwt.sign({ userId: user._id, role: user.role }, secretKey); // Include role in the token
+
+      const token = jwt.sign({ userId: user._id, role: user.role }, secretKey);
       const { password: _, ...userDetails } = user.toObject(); // Remove the password field
 
-      res.status(200).json({ 
-          message: "Login Successful", 
-          type: "success", 
-          token, 
+      res.status(200).json({
+          message: "Login Successful",
+          type: "success",
+          token,
           user: userDetails
       });
   } catch (error) {
@@ -126,6 +130,7 @@ const userProfile = async (req, res) => {
   }
 };
 
+//Upload Banner & Header
 const header = async (req, res) => {
   const userId = req.userId;
 
@@ -163,6 +168,7 @@ const header = async (req, res) => {
   }
 };
 
+//Get Header Banner
 const getheader = async (req, res) => {
   try {
       const headers = await Header.find(); // Fetch all headers
@@ -183,7 +189,7 @@ const getheader = async (req, res) => {
   }
 };
 
-
+// Add Clubs
 const addClub = async (req, res) => {
   const userId = req.userId;
 
@@ -225,6 +231,7 @@ const addClub = async (req, res) => {
   }
 };
 
+//Get All Clubs
 const getAllClubs = async (req, res) => {
   try {
       const { page = 1, limit = 15 } = req.query;
@@ -265,6 +272,112 @@ const getAllClubs = async (req, res) => {
       res.status(500).json({ error: error.message, type: "error" });
   }
 };
+const addTournament = async (req, res) => {
+  try {
+      const {
+          tournamentName,
+          tournamentInfo,
+          date,
+          timeStart,
+          numberOfPigeons,
+          numberOfHelperPigeons,
+          numberOfLoftedPigeons,
+          continueDays,
+          continueDates, 
+          prizes, 
+          numberOfPrizes
+      } = req.body;
+
+      let parsedContinueDates = [];
+      let parsedPrizes = [];
+
+      try {
+          parsedContinueDates = JSON.parse(continueDates).map(item => ({ date: new Date(item.date) })); // Ensure date format
+      } catch (error) {
+          return res.status(400).json({ message: "Invalid format for continueDates." });
+      }
+
+      try {
+          parsedPrizes = JSON.parse(prizes).map(item => ({ name: item.name })); // Ensure prize format
+      } catch (error) {
+          return res.status(400).json({ message: "Invalid format for prizes." });
+      }
+
+      const tournamentImage = req.file ? `tournamentImage/${req.file.filename}` : null;
+
+      // Validate required fields
+      if (!tournamentName || !tournamentInfo || !date || !timeStart) {
+          return res.status(400).json({ message: "Missing required fields." });
+      }
+
+      const newTournament = new Tournament({
+          tournamentImage,
+          tournamentName,
+          tournamentInfo,
+          date,
+          timeStart,
+          numberOfPigeons,
+          numberOfHelperPigeons,
+          numberOfLoftedPigeons,
+          continueDays,
+          continueDates: parsedContinueDates, // Properly formatted
+          prizes: parsedPrizes, // Properly formatted
+          numberOfPrizes
+      });
+
+      const savedTournament = await newTournament.save();
+      res.status(201).json(savedTournament);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+};
+
+
+const getAllTournaments = async (req, res) => {
+  try {
+      const { page = 1, limit = 15 } = req.query;
+
+      const pageNumber = parseInt(page);
+      const limitNumber = parseInt(limit);
+      const skip = (pageNumber - 1) * limitNumber;
+
+      // Fetch tournaments with pagination
+      const tournaments = await Tournament.find()
+          .skip(skip)
+          .limit(limitNumber)
+          .select('tournamentName tournamentInfo numberOfPigeons date timeStart status tournamentImage');
+
+      const totalTournaments = await Tournament.countDocuments();
+
+      if (tournaments.length === 0) {
+          return res.status(404).json({ message: "No tournaments found", type: "info" });
+      }
+
+      // Map over tournaments to format date and add public prefix to tournamentImage
+      const tournamentsWithImage = tournaments.map(tournament => {
+          const formattedDate = tournament.date ? tournament.date.toISOString().split('T')[0] : null; // Format the date
+
+          return {
+              ...tournament.toObject(), // Convert mongoose document to plain object
+              tournamentImage: tournament.tournamentImage ? `/public/${tournament.tournamentImage}` : null, // Add prefix
+              date: formattedDate // Add the formatted date
+          };
+      });
+
+      res.status(200).json({
+          message: "Tournaments retrieved successfully",
+          type: "success",
+          data: {
+              tournaments: tournamentsWithImage,
+              currentPage: pageNumber,
+              totalPages: Math.ceil(totalTournaments / limitNumber),
+              totalItems: totalTournaments,
+          }
+      });
+  } catch (error) {
+      res.status(500).json({ error: error.message, type: "error" });
+  }
+};
 
 
 
@@ -277,5 +390,7 @@ module.exports = {
   header,
   getheader,
   addClub,
-  getAllClubs
+  getAllClubs,
+  addTournament,
+  getAllTournaments,  
 };

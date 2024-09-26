@@ -2,11 +2,14 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import { Typography } from '@mui/material';
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
-const FormTournamentComponent = ({ onSubmit, fields, numberOfPrizes, setNumberOfPrizes, setPrizes }) => {
+const FormTournamentComponent = ({ onSubmit, fields, numberOfPrizes, setNumberOfPrizes, setPrizes, prizes }) => {
     const [formData, setFormData] = useState({});
     const [imagePreview, setImagePreview] = useState(null);
+    const [continueDays, setContinueDays] = useState(0);
+    const [selectedDates, setSelectedDates] = useState([]);
 
     const handleChange = (e) => {
         const { name, value, type } = e.target;
@@ -26,30 +29,65 @@ const FormTournamentComponent = ({ onSubmit, fields, numberOfPrizes, setNumberOf
         }
     };
 
+    const handleContinueDaysChange = (e) => {
+        const days = e.target.value;
+        const parsedDays = parseInt(days, 10);
+
+        if (parsedDays > 30) {
+            toast.error("Can't continue more than 30 days. Resetting to 0 days.");
+            setContinueDays(0);
+            setSelectedDates([]);
+        } else {
+            setContinueDays(parsedDays);
+            setSelectedDates(Array.from({ length: parsedDays }, () => ''));
+        }
+    };
+
+    const handlePrizeChange = (e) => {
+        const value = e.target.value;
+        const parsedValue = parseInt(value, 10);
+     
+        if (value === '') {
+            setNumberOfPrizes('');
+            setPrizes(['']); // Reset prizes if the input is empty
+        } else if (parsedValue >= 1 && parsedValue <= 15) {
+            setNumberOfPrizes(parsedValue);
+            setPrizes(Array.from({ length: parsedValue }, (_, index) => prizes[index] || ''));
+        } else if (parsedValue > 15) {
+            toast.error("You can't add more than 15 prizes.");
+            setPrizes(prevPrizes => Array.from({ length: numberOfPrizes }, (_, index) => prevPrizes[index] || ''));
+        } else {
+            setPrizes(prevPrizes => Array.from({ length: numberOfPrizes }, (_, index) => prevPrizes[index] || ''));
+        }
+    };
+    
+    const handleDateChange = (index, value) => {
+        const newDates = [...selectedDates];
+        newDates[index] = value; // Date strings should be valid
+        setSelectedDates(newDates);
+    };
+    
+
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit(formData);
+        onSubmit({ ...formData, continueDays, continueDates: selectedDates, prizes });
         setFormData({});
-        setImagePreview(null); // Reset image preview on submission
+        setImagePreview(null);
+        setContinueDays(0);
+        setSelectedDates([]);
+        setNumberOfPrizes(''); // Reset to empty after submission
+        setPrizes(['']); // Reset prizes
     };
 
-    const incrementPrizes = () => {
-        setNumberOfPrizes((prev) => prev + 1);
-        setPrizes((prev) => [...prev, '']);
-    };
-
-    const decrementPrizes = () => {
-        if (numberOfPrizes > 1) {
-            setNumberOfPrizes((prev) => prev - 1);
-            setPrizes((prev) => prev.slice(0, -1));
-        }
+    const handleFocus = (e) => {
+        e.target.showPicker();
     };
 
     return (
         <form className="flex flex-col p-4 justify-center items-center gap-2" onSubmit={handleSubmit}>
             {fields.map((field) => (
                 field.type === 'file' ? (
-                    <div key={field.name} className="w-[80%]">
+                    <div key={field.name} className="w-full md:w-3/4">
                         <label className="block mb-2 text-gray-700">Upload Tournament Image</label>
                         <div
                             className={`border-dashed border-2 border-blue-500 rounded-md h-40 flex justify-center items-center cursor-pointer ${imagePreview ? 'bg-gray-100' : ''}`}
@@ -84,25 +122,75 @@ const FormTournamentComponent = ({ onSubmit, fields, numberOfPrizes, setNumberOf
                         label={field.placeholder}
                         value={formData[field.name] || ''}
                         onChange={handleChange}
+                        onFocus={field.type === 'date' || field.type === 'time' ? handleFocus : null}
                         required
-                        className="w-[80%]"
+                        className="w-full md:w-3/4"
                     />
                 )
             ))}
-            <div className="flex  justify-start items-center  gap-3">
-            <Typography>Add Prize Fields</Typography>
-            <div className="flex items-center gap-1">
-                <button type="button" onClick={decrementPrizes} className="border border-gray-300 rounded px-4 py-2 hover:bg-gray-200">-</button>
-                <input
-                    type="number"
-                    value={numberOfPrizes}
-                    readOnly
-                    className="w-20 text-center border border-gray-300 rounded py-2"
+
+            {/* Max Prizes Input */}
+            <TextField
+                variant="outlined"
+                size="small"
+                type="number"
+                label="Enter No. Of Prizes"
+                value={numberOfPrizes} // Keep this controlled
+                onChange={handlePrizeChange}
+                required
+                inputProps={{ min: 1, max: 15 }} // Set min and max for input
+                className="w-full md:w-3/4"
+            />
+            
+            {/* Render Prize Fields */}
+            {Array.from({ length: numberOfPrizes }).map((_, index) => (
+                <TextField
+                    key={`prize-${index}`}
+                    variant="outlined"
+                    size="small"
+                    type="text"
+                    name={`prize${index + 1}`}
+                    label={`Enter Prize ${index + 1}`}
+                    value={prizes[index] || ''}
+                    onChange={(e) => {
+                        const updatedPrizes = [...prizes];
+                        updatedPrizes[index] = e.target.value;
+                        setPrizes(updatedPrizes);
+                    }}
+                    required
+                    className="w-full md:w-3/4"
                 />
-                <button type="button" onClick={incrementPrizes} className="border border-gray-300 rounded px-4 py-2 hover:bg-gray-200">+</button>
-            </div>
-            </div>
-            <Button variant="contained" type="submit">Submit</Button>
+            ))}
+
+            {/* Continue Days Input */}
+            <TextField
+                variant="outlined"
+                size="small"
+                type="number"
+                label="Continue Days"
+                value={continueDays}
+                onChange={handleContinueDaysChange}
+                required
+                className="w-full md:w-3/4"
+            />
+            
+            {/* Selected Dates Fields */}
+            {Array.from({ length: continueDays }).map((_, index) => (
+                <TextField
+                    key={index}
+                    variant="outlined"
+                    size="small"
+                    type="date"
+                    value={selectedDates[index] || ''}
+                    onChange={(e) => handleDateChange(index, e.target.value)}
+                    onFocus={handleFocus}
+                    required
+                    className="w-full md:w-3/4"
+                />
+            ))}
+
+            <Button variant="contained" type="submit" className="mt-4">Submit</Button>
+            <ToastContainer /> {/* Add ToastContainer to the form */}
         </form>
     );
 };
@@ -114,12 +202,13 @@ FormTournamentComponent.propTypes = {
         PropTypes.shape({
             name: PropTypes.string.isRequired,
             type: PropTypes.string.isRequired,
-            placeholder: PropTypes.string.isRequired,
+            placeholder: PropTypes.string,
         })
     ).isRequired,
     numberOfPrizes: PropTypes.number.isRequired,
     setNumberOfPrizes: PropTypes.func.isRequired,
     setPrizes: PropTypes.func.isRequired,
+    prizes: PropTypes.array.isRequired,
 };
 
 export default FormTournamentComponent;

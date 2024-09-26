@@ -5,7 +5,8 @@ const userSchema = new Schema({
   
     role: {
         type: String,
-        enum: ["viewer", "admin"]
+        enum: ["clubowner", "admin"],
+        default: null,
     },
     email: {
         type: String,
