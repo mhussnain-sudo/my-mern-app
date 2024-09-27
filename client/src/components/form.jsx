@@ -1,4 +1,3 @@
-// src/components/FormComponent.jsx
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@mui/material/Button';
@@ -19,7 +18,7 @@ const FormComponent = ({ onSubmit, fields }) => {
     };
 
     return (
-        <form className="flex flex-col  p-4  justify-center items-center gap-2" onSubmit={handleSubmit}>
+        <form className="flex flex-col w-full p-4 justify-center items-center gap-4 sm:gap-6 lg:gap-8" onSubmit={handleSubmit}>
             {fields.map((field) => (
                 <TextField
                     variant="outlined"
@@ -31,10 +30,10 @@ const FormComponent = ({ onSubmit, fields }) => {
                     value={formData[field.name] || ''}
                     onChange={handleChange}
                     required
-                    className="w-72"
+                    className="w-full sm:w-72 lg:w-80" 
                 />
             ))}
-            <Button variant="contained" type="submit">Submit</Button>
+            <Button variant="contained" type="submit" className="w-full sm:w-72 lg:w-80">Submit</Button>
         </form>
     );
 };

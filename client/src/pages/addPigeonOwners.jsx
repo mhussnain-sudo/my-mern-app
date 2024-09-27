@@ -5,7 +5,10 @@ import { addPigeonOwner } from '../apis/userApi';
 import { IconButton } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
-export default function CreatePigeonOwners(){
+import { ToastContainer, toast } from 'react-toastify'; // Import Toastify
+import 'react-toastify/dist/ReactToastify.css'; // Import Toastify styles
+
+export default function CreatePigeonOwners() {
     const [pigeonAvatar, setpigeonAvatar] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [formValues, setFormValues] = useState({
@@ -34,7 +37,11 @@ export default function CreatePigeonOwners(){
 
         try {
             const data = await addPigeonOwner(formData.tournamentName, formData.name, formData.phone, formData.city, pigeonAvatar);
-            console.log("Club created successfully:", data);
+            console.log("Pigeon created successfully:", data);
+            
+            // Show success toast
+            toast.success("Pigeon added successfully!");
+
             // Reset form fields and avatar preview
             setFormValues({
                 tournamentName: '',
@@ -45,12 +52,16 @@ export default function CreatePigeonOwners(){
             setpigeonAvatar(null);
             setAvatarPreview(null);
         } catch (error) {
-            console.error("Error creating club:", error);
+            console.error("Error creating pigeon owner:", error);
+            
+            // Show error toast
+            toast.error("Error adding pigeon owner. Please try again.");
         }
     };
 
     return (
         <div className="flex flex-col px-4 gap-5">
+            <ToastContainer /> {/* Add ToastContainer here */}
             <div className="border shadow-lg w-max p-3">
                 <h1 className="font-bold font-mono text-2xl">Add Pigeon Owner</h1>
             </div>
@@ -78,10 +89,10 @@ export default function CreatePigeonOwners(){
                     <FormComponent 
                         onSubmit={handleSubmit} 
                         fields={[
-                            { name: 'tournamentName', type: 'text', placeholder: 'Enter Tournament Name', value: formValues.clubName, onChange: handleInputChange },
-                            { name: 'name', type: 'text', placeholder: 'Enter Name', value: formValues.clubName, onChange: handleInputChange },
-                            { name: 'phone', type: 'text', placeholder: 'Enter Phone', value: formValues.ownerName, onChange: handleInputChange },
-                            { name: 'city', type: 'text', placeholder: 'Enter City', value: formValues.ownerName, onChange: handleInputChange },
+                            { name: 'tournamentName', type: 'text', placeholder: 'Enter Tournament', value: formValues.tournamentName, onChange: handleInputChange },
+                            { name: 'name', type: 'text', placeholder: 'Enter Name', value: formValues.name, onChange: handleInputChange },
+                            { name: 'phone', type: 'text', placeholder: 'Enter Phone', value: formValues.phone, onChange: handleInputChange },
+                            { name: 'city', type: 'text', placeholder: 'Enter City', value: formValues.city, onChange: handleInputChange },
                         ]} 
                     />
                 </div>

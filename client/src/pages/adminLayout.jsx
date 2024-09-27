@@ -7,10 +7,10 @@ const AdminLayout = ({ children }) => {
     return (
         <div className="flex flex-col">
         <AdminNavbar/>
-        <div className="flex flex-col">
+        <div className="flex flex-col  md:flex-row ">
            
             <Sidebar />
-            <div className="flex-1 bg-slate-50 p-4">
+            <div className="md:flex-1 xl:flex-1 bg-slate-50 mt-2 ">
                 {children}
             </div>
         </div>

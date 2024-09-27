@@ -1,9 +1,9 @@
 const express = require("express");
 const routes = express.Router();
 const controller = require("../controllers/userCtrl.js");
-const { uploadMultiple, uploadclubAvatar,uploadtournamentImage } = require('../middlewares/multerMiddleware.js');
+const { uploadMultiple, uploadclubAvatar,uploadtournamentImage, uploadPigeonAvatar } = require('../middlewares/multerMiddleware.js');
 const verifyToken = require("../middlewares/authMiddleware.js");
-const verifyAdmin = require("../middlewares/verifyAdmin.js");
+const {verifyAdmin,verifysuperior} = require("../middlewares/verifyAdmin.js");
 
 // Getting Routes
 routes.get("/profile", verifyToken, controller.userProfile);
@@ -19,5 +19,6 @@ routes.post("/logout", verifyToken, controller.logoutUser);
 routes.post("/upload-banner", verifyToken, verifyAdmin, uploadMultiple, controller.header);
 routes.post("/add-Club", verifyToken, verifyAdmin, uploadclubAvatar, controller.addClub);
 routes.post("/add-Tournament", verifyToken, verifyAdmin, uploadtournamentImage, controller.addTournament);
-
+routes.post("/add-pigeon", verifyToken, verifysuperior, uploadPigeonAvatar, controller.addPigeon);
+routes.post("/add-pigeonresults", verifyToken, verifysuperior, controller.addPigeonResult);
 module.exports = routes;

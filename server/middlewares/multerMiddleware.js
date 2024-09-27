@@ -7,6 +7,7 @@ const allowedMimeTypes = {
   banners: ["image/jpeg", "image/png"],
   clubAvatar: ["image/jpeg", "image/png"],
   tournamentImage: ["image/jpeg", "image/png"],
+  pigeonAvatar: ["image/jpeg", "image/png"],
 };
 
 const storage = multer.diskStorage({
@@ -23,6 +24,9 @@ const storage = multer.diskStorage({
           break;
         case "tournamentImage":
           destinationPath = `./public/tournamentImage/`;
+          break;
+          case "pigeonAvatar":
+          destinationPath = `./public/pigeonAvatar/`;
           break;
         // Add more file types as needed...
       default:
@@ -66,4 +70,5 @@ const upload = multer({
 const uploadMultiple = upload.array("banners", 5); 
 const uploadclubAvatar = upload.single("clubAvatar");
 const uploadtournamentImage = upload.single("tournamentImage");
-module.exports = {uploadMultiple,uploadclubAvatar,uploadtournamentImage};
+const uploadPigeonAvatar = upload.single("pigeonAvatar");
+module.exports = {uploadMultiple,uploadclubAvatar,uploadtournamentImage,uploadPigeonAvatar};

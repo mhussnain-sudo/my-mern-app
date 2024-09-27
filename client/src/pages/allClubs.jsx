@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import TableBox from "../components/tableBox";
-import { getAllClubs, deleteClub } from '../apis/userApi'; // Ensure deleteClub API is defined
+import { getAllClubs, deleteClub } from '../apis/userApi';
 import Pagination from '../components/pagination';
 
 export default function AllClubs() {
@@ -29,15 +29,14 @@ export default function AllClubs() {
 
     const handleEdit = (club) => {
         console.log("Editing club:", club);
-        // Logic to handle editing the club (e.g., open a modal with a form)
     };
 
     const handleDelete = async (club) => {
         const confirmDelete = window.confirm(`Are you sure you want to delete ${club.clubName}?`);
         if (confirmDelete) {
             try {
-                await deleteClub(club.id); // Adjust according to your API structure
-                fetchClubs(currentPage); // Refresh the list after deletion
+                await deleteClub(club.id);
+                fetchClubs(currentPage);
             } catch (error) {
                 console.error("Error deleting club:", error);
             }
@@ -46,7 +45,7 @@ export default function AllClubs() {
 
     return (
         <div className="flex flex-col px-4 gap-5">
-            <div className="border shadow-lg w-max p-3">
+            <div className="border shadow-lg w-full p-3">
                 <h1 className="font-bold font-mono text-2xl">All Clubs</h1>
             </div>
             {loading ? (

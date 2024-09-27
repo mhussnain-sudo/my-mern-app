@@ -1,112 +1,112 @@
-import { Menu, MenuButton, MenuItems, MenuItem } from "@headlessui/react";
+import { useState, useEffect, useRef } from 'react'; // Import useState and useEffect for managing sidebar state and outside click detection
+import { Sidebar } from "flowbite-react";
+import { HiChartPie } from "react-icons/hi";
+import { SiClubforce } from "react-icons/si";
+import { TbTournament } from "react-icons/tb";
+import { GiSparrow } from "react-icons/gi";
+import { HiBars3BottomLeft } from "react-icons/hi2";
+import { HiBars3BottomRight } from "react-icons/hi2";
+import { Button } from "@mui/material";
+import { useNavigate } from 'react-router-dom';
+import { logout } from '../apis/userApi';
 
+export default function SidebarComponent() {
+  const navigate = useNavigate();
 
-import { Link } from 'react-router-dom';
+  const logoutUser = async () => {
+      try {
+          await logout();
+          localStorage.removeItem('token');
+          navigate('/');
+      } catch (error) {
+          console.error('Logout Error:', error.response?.data || error.message);
+          if (error.response?.status === 401) {
+              navigate('/');
+          }
+      }
+  };
 
-export default function Sidebar() {
-    return (
-        <div className="flex  justify-between items-center  w-full  shadow-md">
-            <div className="flex w-full justify-evenly items-center  py-4 space-y-2">
-                {/* Sidebar Item: Club Details */}
-                <Menu as="div" className="relative inline-block text-center">
-                    <div>
-                        <MenuButton className="flex justify-between w-full rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50">
-                            Club Details
-                            
-                        </MenuButton>
-                    </div>
-                    <MenuItems className=" absolute w-max mt-2 bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                        <div className="py-1">
-                            <MenuItem>
-                                <Link to="/all-clubs" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-100">
-                                    All Clubs
-                                </Link>
-                            </MenuItem>
-                            <MenuItem>
-                                <Link to="/create-club" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-100">
-                                    Create Clubs
-                                </Link>
-                            </MenuItem>
-                        </div>
-                    </MenuItems>
-                </Menu>
+  const [isOpen, setIsOpen] = useState(false); // State for managing sidebar visibility
+  const sidebarRef = useRef(null); // Create a ref for the sidebar
 
-                {/* Sidebar Item: Tournaments */}
-                <Menu as="div" className="relative inline-block text-left">
-                    <div>
-                        <MenuButton className="flex justify-between w-full rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50">
-                            Tournaments
-                          
-                        </MenuButton>
-                    </div>
-                    <MenuItems className="absolute w-max mt-2 bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                        <div className="py-1">
-                            <MenuItem>
-                                <Link to="/all-tournaments" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-100">
-                                    All Tournaments
-                                </Link>
-                            </MenuItem>
-                            <MenuItem>
-                                <Link to="/create-tournaments" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-100">
-                                    Create Tournaments
-                                </Link>
-                            </MenuItem>
-                        </div>
-                    </MenuItems>
-                </Menu>
+  // Close sidebar when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (sidebarRef.current && !sidebarRef.current.contains(event.target) && isOpen) {
+        setIsOpen(false);
+      }
+    };
 
-                {/* Sidebar Item: Pigeon Owners */}
-                <Menu as="div" className="relative inline-block text-left">
-                    <div>
-                        <MenuButton className="flex justify-between w-full rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50">
-                            Pigeon Owners
-                            
-                        </MenuButton>
-                    </div>
-                    <MenuItems className=" absolute w-max mt-2 bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                        <div className="py-1">
-                            <MenuItem>
-                                <Link to="/add-PigeonsResult" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-100">
-                                    Add Pigeons Result
-                                </Link>
-                            </MenuItem>
-                        </div>
-                        <div className="py-1">
-                            <MenuItem>
-                                <Link to="/create-PigeonsOwners" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-100">
-                                    Add Pigeons Owners
-                                </Link>
-                            </MenuItem>
-                        </div>
-                    </MenuItems>
-                </Menu>
+    // Bind the event listener
+    document.addEventListener('mousedown', handleClickOutside);
 
-                {/* Sidebar Item: Banners */}
-                <Menu as="div" className="relative inline-block text-left">
-                    <div>
-                        <MenuButton className="flex justify-between w-full rounded-md bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-gray-300 hover:bg-gray-50">
-                            Banners
-                          
-                        </MenuButton>
-                    </div>
-                    <MenuItems className=" absolute w-max  mt-2 bg-white shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                        <div className="py-1">
-                            <MenuItem>
-                                <Link to="/all-banners" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-100">
-                                    All Banners
-                                </Link>
-                            </MenuItem>
-                            <div className="py-1">
-                            <MenuItem>
-                                <Link to="/create-banners" className="block px-4 py-2 text-sm text-gray-700 hover:bg-blue-100">
-                                    Create Banners
-                                </Link>
-                            </MenuItem>
-                        </div>
-                        </div>
-                    </MenuItems>
-                </Menu>
-            </div>
-        </div>
-    );
+    // Cleanup function to remove the event listener
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  return (
+    <div className="h-screen flex absolute lg:relative"> {/* Flex container for positioning */}
+      {/* Wrapper for the Sidebar to handle refs */}
+      <div ref={sidebarRef} className="h-full">
+        {/* Sidebar for all screen sizes */}
+        <Sidebar
+          aria-label="Sidebar with multi-level dropdown example"
+          className={`lg:w-64 transition-transform ${isOpen ? 'translate-x-0' : '-translate-x-full'} fixed left-0 top-0 h-full bg-white shadow-lg z-50 justify-between lg:relative lg:translate-x-0 flex flex-col`}
+        >
+          {/* Sidebar content that should take up available space */}
+          <div className="flex-grow overflow-y-auto"> {/* Flex-grow to take up remaining space and allow scrolling */}
+            <Sidebar.Items>
+              <Sidebar.ItemGroup>
+                {/* Dashboard */}
+                <Sidebar.Item href="/admin-dashboard" icon={HiChartPie} className="text-blue-700 font-bold">
+                  Dashboard
+                </Sidebar.Item>
+
+                {/* Clubs Dropdown */}
+                <Sidebar.Collapse label={<div className="flex items-center"><SiClubforce className="mr-2 text-blue-700 font-bold" /> Clubs</div>}>
+                  <Sidebar.Item href="/all-clubs">All Clubs</Sidebar.Item>
+                  <Sidebar.Item href="/create-club">Create Club</Sidebar.Item>
+                </Sidebar.Collapse>
+
+                {/* Tournaments Dropdown */}
+                <Sidebar.Collapse label={<div className="flex items-center"><TbTournament className="mr-2 text-blue-700 font-bold" /> Tournaments</div>}>
+                  <Sidebar.Item href="/all-tournaments">All Tournaments</Sidebar.Item>
+                  <Sidebar.Item href="/create-tournaments">Create Tournament</Sidebar.Item>
+                </Sidebar.Collapse>
+
+                {/* Pigeon Owners Dropdown */}
+                <Sidebar.Collapse label={<div className="flex items-center"><GiSparrow className="mr-2 text-blue-700 font-bold" /> Pigeons</div>}>
+                  <Sidebar.Item href="/add-PigeonsResult">Add Pigeon Result</Sidebar.Item>
+                  <Sidebar.Item href="/create-PigeonsOwners">All Pigeon Owners</Sidebar.Item>
+                </Sidebar.Collapse>
+
+                {/* Banners Dropdown */}
+                <Sidebar.Collapse label={<div className="flex items-center"><TbTournament className="mr-2 text-blue-700 font-bold" /> Banners</div>}>
+                  <Sidebar.Item href="/all-banners">All Banner</Sidebar.Item>
+                  <Sidebar.Item href="/create-banners">Add Banners</Sidebar.Item>
+                </Sidebar.Collapse>
+              </Sidebar.ItemGroup>
+            </Sidebar.Items>
+          </div>
+
+          {/* Logout Button placed at the bottom */}
+          <div className="p-4 self-end w-full"> {/* Self-end to stick the logout button to the bottom */}
+            <Button variant="contained" onClick={logoutUser} className="w-full sm:w-auto">
+                LOGOUT
+            </Button>
+          </div>
+        </Sidebar>
+      </div>
+
+      {/* Toggle Button for Mobile */}
+      <button
+        className="lg:hidden fixed top-4 right-4 z-10 bg-gray-100 text-white p-2 rounded"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        {isOpen ? <HiBars3BottomRight className="text-yellow-500"/> : <HiBars3BottomLeft className="text-yellow-500"/>}
+      </button>
+    </div>
+  );
 }

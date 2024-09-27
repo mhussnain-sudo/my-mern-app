@@ -7,49 +7,43 @@ export default function TableBox({ headers, data, onEdit, onDelete }) {
     const baseURL = "http://localhost:3000";
 
     return (
-        <table className="min-w-full border-collapse">
-            <thead>
-                <tr>
-                    {headers.map((header, index) => (
-                        <th key={index} className="border px-4 py-2">{header}</th>
-                    ))}
-                    <th className="border px-4 py-2">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {data.map((item, index) => (
-                    <tr className="justify-center h-14 items-center content-center text-center border shadow-md gap-2" key={index}>
-                        <td className='flex justify-center items-center content-center text-center'>
-                            {item.clubAvatar ? (
-                                <img 
-                                    src={`${baseURL}${item.clubAvatar}`} 
-                                    alt={`${item.clubName} Avatar`} 
-                                    className="w-16 h-16 object-cover"
-                                />
-                            ) : (
-                                <img 
-                                    src="/images/dummyavatar.jpg" 
-                                    alt="defaultAvatar" 
-                                    className="w-16 h-16 object-cover" 
-                                />
-                            )}
-                        </td>
-                        <td className="border px-4 py-2">{item.clubName}</td>
-                        <td className="border px-4 py-2">{item.ownerName}</td>
-                        <td className="border px-4 py-2">{item.email}</td>
-                        <td className="border px-4 py-2">{item.password}</td>
-                        <td className="justify-center items-center text-center border gap-2">
-                            <Button onClick={() => onEdit(item)} sx={{ color: "blue" }}>
-                                <EditSharpIcon />
-                            </Button>
-                            <Button onClick={() => onDelete(item)} sx={{ color: "red" }}>
-                                <DeleteForeverOutlinedIcon />
-                            </Button>
-                        </td>
+        <div className="overflow-x-auto w-full max-w-full xl:p-4"> {/* Adjusted padding for smaller screens */}
+            <table className="min-w-full border-collapse table-auto">
+                <thead className="bg-gray-200">
+                    <tr>
+                        {headers.map((header, index) => (
+                            <th key={index} className="border px-2 py-2 text-center text-sm md:text-base">{header}</th>
+                        ))}
+                        <th className="border px-2 py-2 text-center text-sm md:text-base ">Actions</th>
                     </tr>
-                ))}
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    {data.map((item, index) => (
+                        <tr className="h-14 text-center border shadow-md text-sm md:text-base" key={index}>
+                            <td className='flex justify-center items-center'>
+                                <img 
+                                    src={item.clubAvatar ? `${baseURL}${item.clubAvatar}` : "/images/dummyavatar.jpg"} 
+                                    alt={`${item.clubName} Avatar`} 
+                                    className="w-12 h-12 object-cover rounded-full md:w-16 md:h-16" // Responsive sizes for avatars
+                                />
+                            </td>
+                            <td className="border px-2 py-2 text-sm md:text-base">{item.clubName}</td>
+                            <td className="border px-2 py-2 text-sm md:text-base">{item.ownerName}</td>
+                            <td className="border px-2 py-2 text-sm md:text-base">{item.email}</td>
+                            <td className="border px-2 py-2 text-sm md:text-base">{item.password}</td>
+                            <td className="justify-center items-center text-centerflex">
+                                <Button onClick={() => onEdit(item)} sx={{ color: "blue" }}>
+                                    <EditSharpIcon />
+                                </Button>
+                                <Button onClick={() => onDelete(item)} sx={{ color: "red" }}>
+                                    <DeleteForeverOutlinedIcon />
+                                </Button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+        </div>
     );
 }
 

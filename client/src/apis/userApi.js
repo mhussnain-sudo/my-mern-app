@@ -162,7 +162,7 @@ export const addPigeonOwner = async (tournamentName, name, phone, city, pigeonAv
             formData.append('pigeonAvatar', pigeonAvatar); // Append the avatar file
         }
   
-        const response = await api.post('/users/add-pigeonOwner', formData, {
+        const response = await api.post('/users/add-pigeon', formData, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'multipart/form-data' // Set content type for FormData

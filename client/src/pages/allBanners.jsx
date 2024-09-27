@@ -37,15 +37,22 @@ export default function AllBanners() {
     }
 
     return (
-        <div className="flex flex-col px-4 gap-5">
-            <div className="border shadow-lg w-max p-3">
+        <div className="flex flex-col gap-5 px-4 sm:px-6 md:px-8 lg:px-16 xl:px-24"> {/* Responsive padding */}
+            <div className="border shadow-lg w-full sm:w-max p-3 text-center"> {/* Full width on small screens */}
                 <h1 className="font-bold font-mono text-2xl">All Banners</h1>
             </div>
-            <div className="flex flex-col justify-center items-center">
+            <div className="flex flex-col justify-center items-center gap-6"> {/* Gap added for spacing between banners */}
                 {headers.map(header => (
-                    <div key={header._id} className="flex flex-row justify-center items-center mb-4">
-                        <img src={`${baseurl}${header.banner}`} alt="Banner" className="w-full h-[200px] object-cover" />
-                        <Button sx={{ color: "red" }} onClick={() => handleDelete(header._id)}>
+                    <div key={header._id} className="flex flex-col md:flex-row justify-between items-center w-full max-w-4xl gap-4 border rounded-lg p-4 shadow-lg"> {/* Stack on small screens, row layout on medium+ screens */}
+                        <img 
+                            src={`${baseurl}${header.banner}`} 
+                            alt="Banner" 
+                            className="w-full h-auto md:h-[200px] object-cover rounded-lg" 
+                        />
+                        <Button 
+                            sx={{ color: "red", minWidth: "40px" }} 
+                            onClick={() => handleDelete(header._id)}
+                        >
                             <DeleteForeverOutlinedIcon />
                         </Button>
                     </div>

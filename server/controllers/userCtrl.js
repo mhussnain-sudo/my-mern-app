@@ -3,6 +3,7 @@ const Users = require("../models/userModel");
 const Club = require("../models/clubs");
 const Header = require("../models/header");
 const Tournament = require("../models/tournament");
+const Pigeons = require("../models/pigeon");
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
@@ -379,7 +380,83 @@ const getAllTournaments = async (req, res) => {
   }
 };
 
+// Add Clubs
+const addPigeon = async (req, res) => {
+  const userId = req.userId;
 
+  try {
+    const existingUser = await Users.findById(userId);
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found", type: "error" });
+    }
+
+    // Check if user is an admin
+    if (existingUser.role !== "admin") {
+      return res.status(403).json({ message: "Unauthorized", type: "error" });
+    }
+
+    const { tournamentName, name, phone, city } = req.body;
+
+    // Validate required fields
+    if (!tournamentName || !name || !phone || !city) {
+      return res.status(400).json({ message: "All fields are required", type: "error" });
+    }
+
+
+
+    // Create a new club
+    const newPigeon = new Pigeons({
+      tournamentName,
+      name,
+      phone,
+      city,
+      pigeonAvatar: req.file ? `pigeonAvatar/${req.file.filename}` : null, 
+    });
+
+    // Save the new club to the database
+    await newPigeon.save();
+
+    res.status(201).json({ message: "Pigeon added successfully", type: "success",});
+  } catch (error) {
+    res.status(500).json({ error: error.message, type: "error" });
+  }
+};
+
+const addPigeonResult = async (req, res) => {
+  const { tournamentName, name, startTime, numberOfPigeons, pigeonResults } = req.body;
+
+  // Validate the request data
+  if (!tournamentName || !name || !startTime || !numberOfPigeons || !pigeonResults) {
+      return res.status(400).json({
+          success: false,
+          message: "Please provide all required fields"
+      });
+  }
+
+  try {
+      // Create a new pigeon entry
+      const newPigeon = new Pigeons({
+          tournamentName,
+          name,
+          startTime,
+          numberOfPigeons,
+          pigeonResults // Ensure this matches the expected structure in your request body
+      });
+
+      // Save the pigeon entry to the database
+      const savedPigeon = await newPigeon.save();
+      res.status(201).json({
+          success: true,
+          data: savedPigeon
+      });
+  } catch (error) {
+      console.error("Error creating pigeon:", error);
+      res.status(500).json({
+          success: false,
+          message: "Server error"
+      });
+  }
+};
 
 module.exports = {
   role,
@@ -392,5 +469,7 @@ module.exports = {
   addClub,
   getAllClubs,
   addTournament,
-  getAllTournaments,  
+  getAllTournaments,
+  addPigeon,
+  addPigeonResult  
 };

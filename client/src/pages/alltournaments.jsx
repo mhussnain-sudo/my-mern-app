@@ -4,7 +4,7 @@ import { getAllTournaments, deleteTournaments } from '../apis/userApi'; // Ensur
 import Pagination from '../components/pagination';
 
 export default function AllTournaments() {
-    const headers = ["Image", "Tournament Name","No. Of Pigeons", "Start Date","Add Participants","Status"];
+    const headers = ["Image", "Tournament Name", "No. Of Pigeons", "Start Date", "Add Participants", "Status"];
     const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
@@ -45,9 +45,9 @@ export default function AllTournaments() {
     };
 
     return (
-        <div className="flex flex-col px-4 gap-5">
-            <div className="border shadow-lg w-max p-3">
-                <h1 className="font-bold font-mono text-2xl">All Tournaments</h1>
+        <div className="flex flex-col px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 gap-5">
+            <div className="border shadow-lg w-full sm:w-max p-3">
+                <h1 className="font-bold font-mono text-2xl text-center">All Tournaments</h1>
             </div>
             {loading ? (
                 <p>Loading...</p>
