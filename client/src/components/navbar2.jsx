@@ -74,21 +74,36 @@ const Navbar2 = () => {
     const handleDateSelect = (date) => {
         setSelectedDate(date);
     };
-
-    const calculateTotalTime = (startTime, lastReturnTime) => {
-        const startDate = new Date();
-        const [startHours, startMinutes] = startTime.split(":").map(Number);
-        startDate.setHours(startHours, startMinutes, 0);
-
-        const lastReturnDate = new Date();
-        const [returnHours, returnMinutes] = lastReturnTime.split(":").map(Number);
-        lastReturnDate.setHours(returnHours, returnMinutes, 0);
-
-        const durationMs = lastReturnDate - startDate;
-        const totalHours = Math.floor((durationMs / (1000 * 60 * 60)) % 24);
-        const totalMinutes = Math.floor((durationMs / (1000 * 60)) % 60);
+    const calculateTotalTime = (startTime, returnTimes) => {
+        const [initialStartHours, initialStartMinutes] = startTime.split(":").map(Number);
+        let totalDurationMs = 0; // Accumulate total duration in milliseconds
+        let startHours = initialStartHours; // Use let for mutable variables
+        let startMinutes = initialStartMinutes;
+    
+        returnTimes.forEach(returnTime => {
+            const [returnHours, returnMinutes] = returnTime.split(":").map(Number);
+            
+            // Create a date for the return time
+            const returnDate = new Date();
+            returnDate.setHours(returnHours, returnMinutes, 0);
+            
+            // Calculate duration from startTime to this returnTime
+            const startDate = new Date();
+            startDate.setHours(startHours, startMinutes, 0);
+            
+            // Calculate the duration in milliseconds
+            totalDurationMs += returnDate - startDate;
+    
+            // Update startHours and startMinutes to the last return time for the next iteration
+            startHours = returnHours;
+            startMinutes = returnMinutes;
+        });
+    
+        const totalHours = Math.floor((totalDurationMs / (1000 * 60 * 60)) % 24);
+        const totalMinutes = Math.floor((totalDurationMs / (1000 * 60)) % 60);
         return `${totalHours}h ${totalMinutes}m`;
     };
+    
 
     return (
         <div className="flex flex-col p-4">
@@ -148,43 +163,45 @@ const Navbar2 = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {selectedTournament.participants.map((participant, pIndex) => {
-                                        const resultsForDate = currentPigeonResults.pigeonResults
-                                            .filter(result => formatDate(result.date) === selectedDate) // Filter results by date
-                                            .find(result => result.participantId === participant.id)?.results || []; // Find results for this participant
+    {selectedTournament.participants.map((participant, pIndex) => {
+        console.log(participant);
+        
+        // Get results for the selected date
+        const resultsForDate = currentPigeonResults.pigeonResults
+            .filter(result => formatDate(result.date) === selectedDate) // Filter results by date
+            .find(result => result.participantId === participant.id)?.results || []; // Find results for this participant
 
-                                        // Find the last return time
-                                        const lastReturnTime = resultsForDate
-                                            .reduce((latest, res) => {
-                                                return res.returnTime > latest ? res.returnTime : latest;
-                                            }, "00:00"); // Initial value for comparison
+        // Collect all return times
+        const returnTimes = resultsForDate.map(res => res.returnTime);
 
-                                        // Calculate total time from tournament start to last return time
-                                        const totalTime = calculateTotalTime(selectedTournament.timeStart, lastReturnTime);
+        // Calculate total time from tournament start to each return time
+        const totalTime = calculateTotalTime(selectedTournament.timeStart, returnTimes);
 
-                                        // Get the total number of pigeons for this participant
-                                        const totalPigeons = participant.numberOfPigeons || 0;
+        // Get the total number of pigeons for this participant
+        const totalPigeons = resultsForDate.length;
 
-                                        return (
-                                            <tr key={pIndex}>
-                                                <td className="border border-gray-300 p-2">
-                                                    {pIndex + 1} {/* Displaying Sr. No. */}
-                                                </td>
-                                                <td className="border border-gray-300 p-2">
-                                                    {selectedTournament.name} {/* Displaying all participant names */}
-                                                </td>
-                                                <td className="border border-gray-300 p-2">{totalPigeons}</td> {/* Display Total Pigeons */}
-                                                {resultsForDate.map((res, rIndex) => (
-                                                    <td key={`${participant.name}-${rIndex}`} className="border border-gray-300 p-2">
-                                                        {/* Check if this participant has this pigeon result */}
-                                                        {res.participantId === participant.id ? formatReturnTime(res.returnTime) : "N/A"}
-                                                    </td>
-                                                ))}
-                                                <td className="border border-gray-300 p-2">{totalTime}</td> {/* Display Total Time */}
-                                            </tr>
-                                        );
-                                    })}
-                                </tbody>
+        return (
+            <tr key={pIndex}>
+                <td className="border border-gray-300 p-2">
+                    {pIndex + 1} {/* Displaying Sr. No. */}
+                </td>
+                <td className="border border-gray-300 p-2">
+                    {participant.userName} {/* Displaying participant name */}
+                </td>
+                <td className="border border-gray-300 p-2">{totalPigeons}</td> {/* Display Total Pigeons */}
+                {resultsForDate.map((res, rIndex) => (
+                    <td key={`${participant.name}-${rIndex}`} className="border border-gray-300 p-2">
+                        {/* Check if this participant has this pigeon result */}
+                        {res.participantId === participant.id ? formatReturnTime(res.returnTime) : "N/A"}
+                    </td>
+                ))}
+                <td className="border border-gray-300 p-2">{totalTime}</td> {/* Display Total Time */}
+            </tr>
+        );
+    })}
+</tbody>
+
+
                             </table>
                         </div>
                     )}
