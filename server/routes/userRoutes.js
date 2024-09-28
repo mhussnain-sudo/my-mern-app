@@ -8,8 +8,11 @@ const {verifyAdmin,verifysuperior} = require("../middlewares/verifyAdmin.js");
 // Getting Routes
 routes.get("/profile", verifyToken, controller.userProfile);
 routes.get("/header", controller.getheader);
-routes.get("/all-clubs", controller.getAllClubs);
+routes.get("/all-Clubs", controller.getAllClubs);
+routes.get("/Clubs", controller.getClubs);
 routes.get("/all-Tournaments", controller.getAllTournaments);
+routes.get("/every-tournament", controller.getEveryTournaments);
+routes.get("/every-pigeonResults", controller.getPigeonResult);
 
 // Posting Routes
 routes.post("/set-role", controller.role);

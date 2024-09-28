@@ -67,6 +67,14 @@ export const getAllClubs = async (page = 1, limit = 10) => {
       throw error.response.data; 
   }
 };
+export const getClubs = async () => {
+    try {
+        const response = await api.get(`/users/Clubs`);
+        return response.data.data; // Adjust this to access the clubs properly
+    } catch (error) {
+        throw error.response.data; 
+    }
+};
 
 export const addClub = async (clubName, ownerName, email, password, clubAvatar) => {
   try {
@@ -136,6 +144,22 @@ export const getAllTournaments = async (page = 1, limit = 10) => {
     }
 }
 
+export const getEveryTournament = async ()=>{
+    try {
+        const token = localStorage.getItem('token');
+        const response = await api.get('/users/every-tournament', {
+            
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+        
+    } catch (error) {
+        throw error.response.data;
+    }
+}
+
 export const deleteTournaments = async ()=>{
     try {
         const token = localStorage.getItem('token');
@@ -173,3 +197,46 @@ export const addPigeonOwner = async (tournamentName, name, phone, city, pigeonAv
         throw error.response.data; // Log the error message
     }
   };
+
+  export const addPigeonResult = async (tournamentName, name, startTime, numberOfPigeons, pigeonResults) => {
+    try {
+        const token = localStorage.getItem('token');
+        
+        const formData = {
+            tournamentName,
+            name,
+            startTime,
+            numberOfPigeons,
+            pigeonResults
+        };
+
+        const response = await api.post('/users/add-pigeonresults', formData, {
+            headers: {
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        return response.data; // Return the successful response data
+    } catch (error) {
+        console.error('Error adding pigeon results:', error);
+        if (error.response) {
+            throw error.response.data; // Rethrow the error response
+        } else {
+            throw { message: "Network error occurred" }; // Handle network errors
+        }
+    }
+};
+export const getPigeonResult =async()=>{
+    try {
+        const token = localStorage.getItem('token');
+        const response = await api.get('/users/every-pigeonResults', {
+            headers: {
+                Authorization: `Bearer ${token}`
+            }
+        });
+        return response.data;
+    } catch (error) {
+        throw error.response.data;
+    }
+}

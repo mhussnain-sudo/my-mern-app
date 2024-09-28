@@ -69,7 +69,7 @@ export default function TableBox({ headers, data, onEdit, onDelete }) {
                                     <EditSharpIcon className="text-base" />
                                 </Button>
                                 <Button onClick={() => onDelete(item)} sx={{ color: "red" }}>
-                                    <DeleteForeverOutlinedIcon classname="text-base" />
+                                    <DeleteForeverOutlinedIcon className="text-base" />
                                 </Button>
                             </td>
                         </tr>

@@ -79,7 +79,7 @@ export default function SidebarComponent() {
                 {/* Pigeon Owners Dropdown */}
                 <Sidebar.Collapse label={<div className="flex items-center"><GiSparrow className="mr-2 text-blue-700 font-bold" /> Pigeons</div>}>
                   <Sidebar.Item href="/add-PigeonsResult">Add Pigeon Result</Sidebar.Item>
-                  <Sidebar.Item href="/create-PigeonsOwners">All Pigeon Owners</Sidebar.Item>
+                  <Sidebar.Item href="/create-PigeonsOwners">Add Pigeon Owners</Sidebar.Item>
                 </Sidebar.Collapse>
 
                 {/* Banners Dropdown */}
@@ -105,7 +105,7 @@ export default function SidebarComponent() {
         className="lg:hidden fixed top-4 right-4 z-10 bg-gray-100 text-white p-2 rounded"
         onClick={() => setIsOpen(!isOpen)}
       >
-        {isOpen ? <HiBars3BottomRight className="text-yellow-500"/> : <HiBars3BottomLeft className="text-yellow-500"/>}
+        {isOpen ? <HiBars3BottomRight className="text-blue-700"/> : <HiBars3BottomLeft className="text-blue-700"/>}
       </button>
     </div>
   );

@@ -4,6 +4,7 @@ const Club = require("../models/clubs");
 const Header = require("../models/header");
 const Tournament = require("../models/tournament");
 const Pigeons = require("../models/pigeon");
+const PigeonsResults = require("../models/pigeonResult");
 const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken");
 const fs = require("fs");
@@ -273,6 +274,35 @@ const getAllClubs = async (req, res) => {
       res.status(500).json({ error: error.message, type: "error" });
   }
 };
+const getClubs = async (req, res) => {
+  try {
+      // Fetch clubs with pagination
+      const clubs = await Club.find()
+  
+
+      const totalClubs = await Club.countDocuments();
+
+      if (clubs.length === 0) {
+          return res.status(404).json({ message: "No clubs found", type: "info" });
+      }
+
+      // Map over clubs to add public prefix to clubAvatar
+      const clubsWithAvatar = clubs.map(club => ({
+          ...club.toObject(), // Convert mongoose document to plain object
+          clubAvatar: club.clubAvatar ? `/public/${club.clubAvatar}` : null, // Add prefix
+      }));
+
+      res.status(200).json({
+          message: "Clubs retrieved successfully",
+          type: "success",
+          data: {
+              clubs: clubsWithAvatar,
+          }
+      });
+  } catch (error) {
+      res.status(500).json({ error: error.message, type: "error" });
+  }
+};
 const addTournament = async (req, res) => {
   try {
       const {
@@ -310,7 +340,10 @@ const addTournament = async (req, res) => {
       if (!tournamentName || !tournamentInfo || !date || !timeStart) {
           return res.status(400).json({ message: "Missing required fields." });
       }
-
+      const existingTournament = await Tournament.findOne({ tournamentName });
+if (existingTournament) {
+  return res.status(400).json({ message: "A tournament with this name already exists.", type: "error" });
+}
       const newTournament = new Tournament({
           tournamentImage,
           tournamentName,
@@ -380,11 +413,38 @@ const getAllTournaments = async (req, res) => {
   }
 };
 
-// Add Clubs
+const getEveryTournaments = async (req, res) => {
+  try {
+
+      const tournaments = await Tournament.find()
+    
+
+      if (tournaments.length === 0) {
+          return res.status(404).json({ message: "No tournaments found", type: "info" });
+      }
+    // Add public prefix to tournamentImage
+    const updatedTournaments = tournaments.map(tournament => {
+      return {
+        ...tournament.toObject(), // Convert mongoose document to plain object
+        tournamentImage: `public/${tournament.tournamentImage}` // Assuming you have a PUBLIC_URL in your environment variables
+      };
+    });
+
+      res.status(200).json({
+          message: "Tournaments retrieved successfully",
+          type: "success",
+          tournaments: updatedTournaments
+      });
+  } catch (error) {
+      res.status(500).json({ error: error.message, type: "error" });
+  }
+};
+
 const addPigeon = async (req, res) => {
   const userId = req.userId;
 
   try {
+    // Check if the user exists
     const existingUser = await Users.findById(userId);
     if (!existingUser) {
       return res.status(404).json({ message: "User not found", type: "error" });
@@ -395,32 +455,53 @@ const addPigeon = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized", type: "error" });
     }
 
+    // Extract fields from request body
     const { tournamentName, name, phone, city } = req.body;
+    const pigeonAvatar = req.file ? `pigeonAvatar/${req.file.filename}` : null;
 
     // Validate required fields
     if (!tournamentName || !name || !phone || !city) {
       return res.status(400).json({ message: "All fields are required", type: "error" });
     }
 
+    // Check if the tournament exists
+    const tournament = await Tournament.findOne({ tournamentName });
+    if (!tournament) {
+      return res.status(404).json({ message: "Tournament not found", type: "error" });
+    }
 
-
-    // Create a new club
+    // Create a new pigeon
     const newPigeon = new Pigeons({
       tournamentName,
       name,
       phone,
       city,
-      pigeonAvatar: req.file ? `pigeonAvatar/${req.file.filename}` : null, 
+      pigeonAvatar,
     });
 
-    // Save the new club to the database
+    // Save the new pigeon to the database
     await newPigeon.save();
 
-    res.status(201).json({ message: "Pigeon added successfully", type: "success",});
+    // Update the tournament to add the new participant's name
+    await Tournament.findByIdAndUpdate(
+      tournament._id, // Use the found tournament ID
+      {
+        $push: {
+          participants: {
+            member: newPigeon._id,
+            userName: name, // Save the name of the pigeon (participant)
+          },
+        },
+      },
+      { new: true }
+    );
+
+    res.status(201).json({ message: "Pigeon added successfully and participant registered in tournament", type: "success" });
   } catch (error) {
     res.status(500).json({ error: error.message, type: "error" });
   }
 };
+
 
 const addPigeonResult = async (req, res) => {
   const { tournamentName, name, startTime, numberOfPigeons, pigeonResults } = req.body;
@@ -433,17 +514,21 @@ const addPigeonResult = async (req, res) => {
       });
   }
 
-  try {
-      // Create a new pigeon entry
-      const newPigeon = new Pigeons({
-          tournamentName,
-          name,
-          startTime,
-          numberOfPigeons,
-          pigeonResults // Ensure this matches the expected structure in your request body
-      });
+  // Ensure pigeonResults is formatted correctly
+  const formattedResults = pigeonResults.map(item => ({
+      date: item.date,
+      results: item.results // Assuming results is already structured correctly
+  }));
 
-      // Save the pigeon entry to the database
+  const newPigeon = new PigeonsResults({
+      tournamentName,
+      name,
+      startTime,
+      numberOfPigeons,
+      pigeonResults: formattedResults
+  });
+
+  try {
       const savedPigeon = await newPigeon.save();
       res.status(201).json({
           success: true,
@@ -451,12 +536,27 @@ const addPigeonResult = async (req, res) => {
       });
   } catch (error) {
       console.error("Error creating pigeon:", error);
+      if (error.name === 'ValidationError') {
+          console.error("Validation errors:", error.errors);
+      }
       res.status(500).json({
           success: false,
           message: "Server error"
       });
   }
 };
+
+const getPigeonResult = async (req,res)=>{
+  try {
+    const pigeonResults = await PigeonsResults.find();
+    if (!pigeonResults) {
+      return res.status(404).json({ message: "Pigeon not found", type: "error" });
+    }
+    res.status(200).json({ message: "Pigeon result retrieved successfully", type: "success", data: pigeonResults });
+  } catch (error) {
+    res.status(500).json({ error: error.message, type: "error" });
+  }
+}
 
 module.exports = {
   role,
@@ -468,8 +568,11 @@ module.exports = {
   getheader,
   addClub,
   getAllClubs,
+  getClubs,
   addTournament,
   getAllTournaments,
+  getEveryTournaments,
   addPigeon,
-  addPigeonResult  
+  addPigeonResult,
+  getPigeonResult,  
 };

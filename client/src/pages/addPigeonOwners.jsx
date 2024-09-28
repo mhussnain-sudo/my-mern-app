@@ -1,15 +1,16 @@
-// CreateClub.jsx
-import { useState } from 'react';
-import FormComponent from '../components/form';
-import { addPigeonOwner } from '../apis/userApi';
+import { useEffect, useState } from 'react';
+import FormPigeonOwnerComponent from '../components/formPigeonOwner';
+import { addPigeonOwner, getEveryTournament } from '../apis/userApi'; 
 import { IconButton } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
-import { ToastContainer, toast } from 'react-toastify'; // Import Toastify
-import 'react-toastify/dist/ReactToastify.css'; // Import Toastify styles
+import { ToastContainer, toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Autocomplete from '@mui/material/Autocomplete';
+import TextField from '@mui/material/TextField';
 
 export default function CreatePigeonOwners() {
-    const [pigeonAvatar, setpigeonAvatar] = useState(null);
+    const [pigeonAvatar, setPigeonAvatar] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [formValues, setFormValues] = useState({
         tournamentName: '',
@@ -17,51 +18,66 @@ export default function CreatePigeonOwners() {
         phone: '',
         city: ''
     });
+    const [tournaments, setTournaments] = useState([]);
+
+    useEffect(() => {
+        const fetchTournaments = async () => {
+            try {
+                const response = await getEveryTournament();
+                if (response.tournaments && Array.isArray(response.tournaments)) {
+                    setTournaments(response.tournaments);
+                } else {
+                    setTournaments([]);
+                }
+            } catch (error) {
+                console.error("Error fetching tournaments:", error);
+                toast.error("Error fetching tournaments: " + error.message);
+            }
+        };
+
+        fetchTournaments();
+    }, []);
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
-        setpigeonAvatar(file);
+        setPigeonAvatar(file);
         setAvatarPreview(URL.createObjectURL(file));
     };
 
-    const handleInputChange = (event) => {
-        const { name, value } = event.target;
+    const handleFormChange = (newFormValues) => {
         setFormValues(prevValues => ({
             ...prevValues,
-            [name]: value
+            ...newFormValues
         }));
     };
 
     const handleSubmit = async (formData) => {
-        console.log('Form Data:', { ...formData, pigeonAvatar });
+        const completeData = { ...formValues, ...formData, pigeonAvatar };
+        console.log('Form Data:', completeData);
 
         try {
-            const data = await addPigeonOwner(formData.tournamentName, formData.name, formData.phone, formData.city, pigeonAvatar);
+            const data = await addPigeonOwner(completeData.tournamentName, completeData.name, completeData.phone, completeData.city, pigeonAvatar);
             console.log("Pigeon created successfully:", data);
-            
-            // Show success toast
             toast.success("Pigeon added successfully!");
 
-            // Reset form fields and avatar preview
+            // Reset form values
             setFormValues({
                 tournamentName: '',
                 name: '',
                 phone: '',
                 city: '',
             });
-            setpigeonAvatar(null);
+            setPigeonAvatar(null);
             setAvatarPreview(null);
         } catch (error) {
             console.error("Error creating pigeon owner:", error);
-            
-            // Show error toast
             toast.error("Error adding pigeon owner. Please try again.");
         }
     };
 
     return (
         <div className="flex flex-col px-4 gap-5">
-            <ToastContainer /> {/* Add ToastContainer here */}
+            <ToastContainer />
             <div className="border shadow-lg w-max p-3">
                 <h1 className="font-bold font-mono text-2xl">Add Pigeon Owner</h1>
             </div>
@@ -86,14 +102,29 @@ export default function CreatePigeonOwners() {
                             </IconButton>
                         </label>
                     </div>
-                    <FormComponent 
+                    <Autocomplete
+                        options={tournaments}
+                        getOptionLabel={(option) => option.tournamentName || ""}
+                        onChange={(event, value) => {
+                            setFormValues(prevValues => ({
+                                ...prevValues,
+                                tournamentName: value ? value.tournamentName : ''
+                            }));
+                        }}
+                        renderInput={(params) => (
+                            <TextField {...params} label="Enter Tournament" variant="outlined" />
+                        )}
+                        style={{ width: '100%' }}
+                    />
+                    <FormPigeonOwnerComponent 
                         onSubmit={handleSubmit} 
                         fields={[
-                            { name: 'tournamentName', type: 'text', placeholder: 'Enter Tournament', value: formValues.tournamentName, onChange: handleInputChange },
-                            { name: 'name', type: 'text', placeholder: 'Enter Name', value: formValues.name, onChange: handleInputChange },
-                            { name: 'phone', type: 'text', placeholder: 'Enter Phone', value: formValues.phone, onChange: handleInputChange },
-                            { name: 'city', type: 'text', placeholder: 'Enter City', value: formValues.city, onChange: handleInputChange },
-                        ]} 
+                            { name: 'name', type: 'text', placeholder: 'Enter Name' },
+                            { name: 'phone', type: 'text', placeholder: 'Enter Phone' },
+                            { name: 'city', type: 'text', placeholder: 'Enter City' },
+                        ]}
+                        formValues={formValues}
+                        onFormChange={handleFormChange}
                     />
                 </div>
             </div>

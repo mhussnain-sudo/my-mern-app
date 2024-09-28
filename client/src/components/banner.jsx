@@ -49,7 +49,7 @@ const HeaderComponent = () => {
           const imagePath = `${baseurl}${header.banner}`;
           return (
             <div key={header._id}>
-              <img src={imagePath} alt="Header Banner" className='w-full h-[300px] object-cover' />
+              <img src={imagePath} alt="Header Banner" className='w-full h-max object-cover' />
             </div>
           );
         })}

@@ -40,5 +40,5 @@ const pigeonSchema = new Schema({
     pigeonResults: [dailyResultsSchema], // Changed to an array of dailyResultsSchema
 }, { timestamps: true });
 
-const Pigeons = mongoose.model("pigeons", pigeonSchema);
-module.exports = Pigeons;
+const PigeonsResults = mongoose.model("pigeonsresults", pigeonSchema);
+module.exports = PigeonsResults;

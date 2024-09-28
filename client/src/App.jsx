@@ -14,6 +14,8 @@ import CreatePigeonOwners from './pages/addPigeonOwners';
 import AllBanners from './pages/allBanners';
 import CreateBanners from './pages/createBanners';
 import AdminLayout from './pages/adminLayout';
+import './App.css'; // or './input.css'
+
 
 function App() {
     const { user, loading } = useAuth();

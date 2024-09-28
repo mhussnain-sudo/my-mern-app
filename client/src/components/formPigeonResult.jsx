@@ -2,76 +2,111 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
-import { ToastContainer} from 'react-toastify';
+import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
-const FormPigeonComponent = ({ onSubmit, fields, setNumberOfPrizes, setPrizes, prizes }) => {
+const FormPigeonComponent = ({ onSubmit, fields }) => {
     const [formData, setFormData] = useState({});
-    const [ setImagePreview] = useState(null);
-    const [continueDays, setContinueDays] = useState(0);
-    const [selectedDates, setSelectedDates] = useState([]);
+    const [dailyResults, setDailyResults] = useState([{ date: '', results: [{ pigeonNo: '', returnTime: '' }] }]);
 
     const handleChange = (e) => {
-        const { name, value, type } = e.target;
-
-        if (type === 'file') {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onloadend = () => {
-                    setImagePreview(reader.result);
-                };
-                reader.readAsDataURL(file);
-                setFormData({ ...formData, [name]: file });
-            }
-        } else {
-            setFormData({ ...formData, [name]: value });
-        }
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
     };
 
+    const handleResultChange = (dayIndex, resultIndex, e) => {
+        const { name, value } = e.target;
+        const newResults = [...dailyResults];
+        newResults[dayIndex].results[resultIndex][name] = value;
+        setDailyResults(newResults);
+    };
 
+    const handleAddResult = (dayIndex) => {
+        const newResults = [...dailyResults];
+        newResults[dayIndex].results.push({ pigeonNo: '', returnTime: '' });
+        setDailyResults(newResults);
+    };
 
+    const handleAddDay = () => {
+        setDailyResults([...dailyResults, { date: '', results: [{ pigeonNo: '', returnTime: '' }] }]);
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit({ ...formData, continueDays, continueDates: selectedDates, prizes });
+        onSubmit({ ...formData, pigeonResults: dailyResults });
         setFormData({});
-        setImagePreview(null);
-        setContinueDays(0);
-        setSelectedDates([]);
-        setNumberOfPrizes(''); // Reset to empty after submission
-        setPrizes(['']); // Reset prizes
-    };
-
-    const handleFocus = (e) => {
-        e.target.showPicker();
+        setDailyResults([{ date: '', results: [{ pigeonNo: '', returnTime: '' }] }]); // Reset daily results
     };
 
     return (
         <form className="flex flex-col p-4 justify-center items-center gap-2" onSubmit={handleSubmit}>
             {fields.map((field) => (
+                <TextField
+                    variant="outlined"
+                    size="small"
+                    key={field.name}
+                    type={field.type}
+                    name={field.name}
+                    label={field.placeholder}
+                    value={formData[field.name] || ''}
+                    onChange={handleChange}
+                    required
+                    className="w-full md:w-3/4"
+                />
+            ))}
 
+            {dailyResults.map((day, dayIndex) => (
+                <div key={dayIndex} className="mb-4">
                     <TextField
                         variant="outlined"
                         size="small"
-                        key={field.name}
-                        type={field.type}
-                        name={field.name}
-                        label={field.placeholder}
-                        value={formData[field.name] || ''}
-                        onChange={handleChange}
-                        onFocus={field.type === 'date' || field.type === 'time' ? handleFocus : null}
+                        name={`date-${dayIndex}`}
+                        label={`Date for Day ${dayIndex + 1}`}
+                        type="date"
+                        value={day.date}
+                        onChange={(e) => {
+                            const newResults = [...dailyResults];
+                            newResults[dayIndex].date = e.target.value;
+                            setDailyResults(newResults);
+                        }}
                         required
-                        className="w-full md:w-3/4"
+                        className="w-full md:w-3/4 mb-2"
                     />
-                
+                    {day.results.map((result, resultIndex) => (
+                        <div key={resultIndex} className="flex gap-2">
+                            <TextField
+                                variant="outlined"
+                                size="small"
+                                name="pigeonNo"
+                                label="Pigeon No"
+                                value={result.pigeonNo}
+                                onChange={(e) => handleResultChange(dayIndex, resultIndex, e)}
+                                required
+                                className="w-full md:w-3/4"
+                            />
+                            <TextField
+                                variant="outlined"
+                                size="small"
+                                name="returnTime"
+                                label="Return Time"
+                                type="time"
+                                value={result.returnTime}
+                                onChange={(e) => handleResultChange(dayIndex, resultIndex, e)}
+                                required
+                                className="w-full md:w-3/4"
+                            />
+                        </div>
+                    ))}
+                    <Button variant="outlined" onClick={() => handleAddResult(dayIndex)} className="mt-2">
+                        Add Result
+                    </Button>
+                </div>
             ))}
-
-
-  
-
+            <Button variant="outlined" onClick={handleAddDay} className="mt-4">
+                Add Day
+            </Button>
             <Button variant="contained" type="submit" className="mt-4">Submit</Button>
-            <ToastContainer /> {/* Add ToastContainer to the form */}
+            <ToastContainer />
         </form>
     );
 };

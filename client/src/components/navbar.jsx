@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
-import { getAllClubs } from '../apis/userApi'; // Adjust the import path as necessary
+import { getClubs } from '../apis/userApi';
+import { GrHomeRounded } from "react-icons/gr";
+import { BsPerson } from "react-icons/bs";
+import { Link } from 'react-router-dom';
 
 export default function Navbar() {
     const [clubs, setClubs] = useState([]);
@@ -9,14 +12,13 @@ export default function Navbar() {
         const fetchClubs = async () => {
             console.log('Fetching');
             try {
-                const data = await getAllClubs(); // Get the response data
-                console.log("Clubs Data:", data); // Check the full response
+                const data = await getClubs();
+                console.log("Clubs Data:", data);
                 
-                // Check if the response has the expected structure
                 if (data && data.clubs) {
-                    setClubs(data.clubs); // Set the clubs state
+                    setClubs(data.clubs);
                 } else {
-                    setClubs([]); // Fallback if no clubs are found
+                    setClubs([]);
                 }
             } catch (err) {
                 setError(err.message);
@@ -27,25 +29,30 @@ export default function Navbar() {
     }, []);
 
     if (error) {
-        return <div>Error: {error}</div>;
+        return <div className="text-red-500">Error: {error}</div>;
     }
 
     return (
-        <div className="flex flex-row justify-between bg-slate-400 p-2">
-            <div className="flex flex-row bg-slate-300">
-                <a href="/">Home</a>
-                {/* Map over clubs and display them */}
-               
+        <div className="flex flex-col justify-between bg-slate-500 p-4 gap-1">
+            <div className="flex items-center justify-between w-full px-5 ">
+                <Link className='text-white text-2xl font-bold' to="/">
+                    <GrHomeRounded />
+                </Link>
+                <Link className='text-white text-2xl font-bold' to="/login">
+                    <BsPerson />
+                </Link>
             </div>
-            <div className='flex'>
-            {clubs.length > 0 ? (
+            <div className="flex flex-wrap justify-center mt-4 md:mt-0">
+                {clubs.length > 0 ? (
                     clubs.map((club) => (
-                        <a key={club._id} href={`/clubs/${club._id}`} className="ml-4">
-                            {club.clubName}
-                        </a>
+                        <div key={club._id} className="p-2 text-center w-max">
+                            <Link to={`/clubs/${club._id}`} className="text-white font-semibold hover:text-yellow-500">
+                                {club.clubName}
+                            </Link>
+                        </div>
                     ))
                 ) : (
-                    <span>No clubs available</span>
+                    <span className="text-white">No clubs available</span>
                 )}
             </div>
         </div>

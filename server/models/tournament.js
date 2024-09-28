@@ -17,6 +17,17 @@ const continueDateSchema = new Schema({
     required: true, // Ensure each date is required
   }
 });
+const participantsSchema = new Schema({
+  member: {
+    type: Schema.Types.ObjectId,
+    ref: 'Pigeons',
+  },
+  userName: {
+    type: String,
+    required: true, // Ensure the user name is saved
+  },
+});
+
 
 // Main tournament schema
 const tournamentSchema = new Schema({
@@ -74,6 +85,7 @@ const tournamentSchema = new Schema({
     max: 15 // Validate the number of prizes
   },
   prizes: [prizeSchema], // Change to an array of prize objects
+  participants: [participantsSchema],
 
 }, { timestamps: true });
 
