@@ -4,11 +4,13 @@ const { Schema } = mongoose;
 const pigeonResultSchema = new Schema({
     pigeonNo: {
         type: String,
-        required: true // Ensuring this field is required
+        required: true ,// Ensuring this field is required
+        default:'-'
     },
     returnTime: {
         type: String,
-        required: true // Ensuring this field is required
+        required: true, // Ensuring this field is required
+        default:'-'
     }
 }, { _id: false }); // Disable automatic ID generation for nested schema
 

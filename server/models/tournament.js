@@ -22,10 +22,16 @@ const participantsSchema = new Schema({
     type: Schema.Types.ObjectId,
     ref: 'Pigeons',
   },
+  avatar:{
+    type:Schema.Types.String,
+  },
   userName: {
     type: String,
     required: true, // Ensure the user name is saved
   },
+  phone:{
+    type:Schema.Types.String,
+  }
 });
 
 

@@ -4,9 +4,10 @@ import Autocomplete from '@mui/material/Autocomplete';
 import TextField from '@mui/material/TextField';
 
 const Navbar2 = () => {
+
+const baseurl = 'http://localhost:3000/';
     const [tournaments, setTournaments] = useState([]);
     const [selectedTournament, setSelectedTournament] = useState(null);
-    console.log(selectedTournament);
     const [pigeonResults, setPigeonResults] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
 
@@ -16,7 +17,6 @@ const Navbar2 = () => {
                 const response = await getEveryTournament();
                 if (response.tournaments && Array.isArray(response.tournaments)) {
                     setTournaments(response.tournaments);
-                    console.log(response.tournaments);
                 } else {
                     setTournaments([]);
                 }
@@ -59,51 +59,27 @@ const Navbar2 = () => {
             : date.toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' });
     };
 
-    const formatReturnTime = (timeString) => {
-        if (!timeString) return "Invalid Time";
-
-        const [hours, minutes] = timeString.split(":").map(Number);
-        const date = new Date();
-        date.setHours(hours, minutes, 0);
-        
-        return isNaN(date.getTime())
-            ? "Invalid Time"
-            : date.toLocaleString(undefined, { hour: '2-digit', minute: '2-digit', hour12: true });
-    };
-
     const handleDateSelect = (date) => {
         setSelectedDate(date);
     };
+
     const calculateTotalTime = (startTime, returnTimes) => {
         const [initialStartHours, initialStartMinutes] = startTime.split(":").map(Number);
         let totalDurationMs = 0; // Accumulate total duration in milliseconds
-        let startHours = initialStartHours; // Use let for mutable variables
-        let startMinutes = initialStartMinutes;
-    
+
         returnTimes.forEach(returnTime => {
             const [returnHours, returnMinutes] = returnTime.split(":").map(Number);
-            
-            // Create a date for the return time
             const returnDate = new Date();
             returnDate.setHours(returnHours, returnMinutes, 0);
-            
-            // Calculate duration from startTime to this returnTime
             const startDate = new Date();
-            startDate.setHours(startHours, startMinutes, 0);
-            
-            // Calculate the duration in milliseconds
+            startDate.setHours(initialStartHours, initialStartMinutes, 0);
             totalDurationMs += returnDate - startDate;
-    
-            // Update startHours and startMinutes to the last return time for the next iteration
-            startHours = returnHours;
-            startMinutes = returnMinutes;
         });
-    
-        const totalHours = Math.floor((totalDurationMs / (1000 * 60 * 60)) % 24);
-        const totalMinutes = Math.floor((totalDurationMs / (1000 * 60)) % 60);
+
+        const totalHours = Math.floor(totalDurationMs / (1000 * 60 * 60));
+        const totalMinutes = Math.floor((totalDurationMs % (1000 * 60 * 60)) / (1000 * 60));
         return `${totalHours}h ${totalMinutes}m`;
     };
-    
 
     return (
         <div className="flex flex-col p-4">
@@ -120,9 +96,8 @@ const Navbar2 = () => {
                 <h2 className="text-lg font-semibold">Start Time</h2>
                 <p className="text-blue-600 font-bold text-4xl">
                     {selectedTournament 
-                        ? formatReturnTime(selectedTournament.timeStart) 
-                        : 'Select a tournament to see the start time.'
-                    }
+                        ? selectedTournament.timeStart 
+                        : 'Select a tournament to see the start time.'}
                 </p>
             </div>
 
@@ -150,26 +125,23 @@ const Navbar2 = () => {
                             <table className="min-w-full border-collapse border text-center border-gray-300">
                                 <thead>
                                     <tr className="bg-gray-100">
-                                        <th className="border border-gray-300 p-2">Sr.   
- No.</th>
+                                        <th className="border border-gray-300 p-2">Sr. No</th>
                                         <th className="border border-gray-300 p-2">Participants</th>
                                         <th className="border border-gray-300 p-2">Total Pigeons</th>
                                         {currentPigeonResults.pigeonResults
                                             .find(result => formatDate(result.date) === selectedDate)
-                                            ?.results.map(res => (
-                                                <th key={res.pigeonNo} className="border border-gray-300 p-2">{res.pigeonNo}</th>
+                                            ?.results.map((res, index) => (
+                                                <th key={res.pigeonNo} className="border border-gray-300 p-2">{`#${index + 1}`}</th>
                                             ))}
                                         <th className="border border-gray-300 p-2">Total Time</th>
                                     </tr>
                                 </thead>
                                 <tbody>
     {selectedTournament.participants.map((participant, pIndex) => {
-        console.log(participant);
-        
-        // Get results for the selected date
+        console.log(selectedTournament.participants)
         const resultsForDate = currentPigeonResults.pigeonResults
-            .filter(result => formatDate(result.date) === selectedDate) // Filter results by date
-            .find(result => result.participantId === participant.id)?.results || []; // Find results for this participant
+            .filter(result => formatDate(result.date) === selectedDate)
+            .find(result => result.participantId === participant.id)?.results || [];
 
         // Collect all return times
         const returnTimes = resultsForDate.map(res => res.returnTime);
@@ -179,29 +151,42 @@ const Navbar2 = () => {
 
         // Get the total number of pigeons for this participant
         const totalPigeons = resultsForDate.length;
+        
 
         return (
             <tr key={pIndex}>
-                <td className="border border-gray-300 p-2">
-                    {pIndex + 1} {/* Displaying Sr. No. */}
+                <td className="border border-gray-300 p-2">{pIndex + 1}</td>
+                <td className=" flex justify-center border  border-gray-300 p-2">
+                    {participant.avatar ? (
+                       
+                        <img
+                            src={`${baseurl}${participant.avatar}`}
+                            alt={`${participant.userName}'s avatar`}
+                            className="w-12 h-12 rounded-full mr-2"
+                        />
+                    ) : (
+                        <div className="w-12 h-12 rounded-full bg-gray-200 mr-2"></div> // Placeholder if avatar is null
+                    )}
+                    <div className=" flex flex-col">
+                        <div>
+                    {participant.userName}
+                    </div>
+                    <div>
+                    {participant.phone}
+                    </div>
+                    </div>
                 </td>
-                <td className="border border-gray-300 p-2">
-                    {participant.userName} {/* Displaying participant name */}
-                </td>
-                <td className="border border-gray-300 p-2">{totalPigeons}</td> {/* Display Total Pigeons */}
+                <td className="border border-gray-300 p-2">{totalPigeons}</td>
                 {resultsForDate.map((res, rIndex) => (
                     <td key={`${participant.name}-${rIndex}`} className="border border-gray-300 p-2">
-                        {/* Check if this participant has this pigeon result */}
-                        {res.participantId === participant.id ? formatReturnTime(res.returnTime) : "N/A"}
+                        {res.participantId === participant.id ? res.returnTime : "N/A"}
                     </td>
                 ))}
-                <td className="border border-gray-300 p-2">{totalTime}</td> {/* Display Total Time */}
+                <td className="border border-gray-300 p-2">{totalTime}</td>
             </tr>
         );
     })}
 </tbody>
-
-
                             </table>
                         </div>
                     )}

@@ -174,11 +174,6 @@ const header = async (req, res) => {
 const getheader = async (req, res) => {
   try {
       const headers = await Header.find(); // Fetch all headers
-
-      if (!headers.length) {
-          return res.status(404).json({ message: "No headers found", type: "error" });
-      }
-
       // Prepend the public prefix to the banner path for the frontend
       const headersWithPath = headers.map(header => ({
           ...header._doc,
@@ -415,31 +410,38 @@ const getAllTournaments = async (req, res) => {
 
 const getEveryTournaments = async (req, res) => {
   try {
+    const tournaments = await Tournament.find();
 
-      const tournaments = await Tournament.find()
-    
+    if (tournaments.length === 0) {
+      return res.status(404).json({ message: "No tournaments found", type: "info" });
+    }
 
-      if (tournaments.length === 0) {
-          return res.status(404).json({ message: "No tournaments found", type: "info" });
-      }
-    // Add public prefix to tournamentImage
+    // Add public prefix to tournamentImage and participants' avatars
     const updatedTournaments = tournaments.map(tournament => {
+      // Map over the participants to add the public prefix to their avatars
+      const updatedParticipants = tournament.participants.map(participant => {
+        return {
+          ...participant.toObject(), // Convert participant document to plain object
+          avatar: participant.avatar ? `public/${participant.avatar}` : null // Add public prefix to avatar
+        };
+      });
+
       return {
-        ...tournament.toObject(), // Convert mongoose document to plain object
-        tournamentImage: `public/${tournament.tournamentImage}` // Assuming you have a PUBLIC_URL in your environment variables
+        ...tournament.toObject(), // Convert tournament document to plain object
+        tournamentImage: `public/${tournament.tournamentImage}`, // Add public prefix to tournament image
+        participants: updatedParticipants // Include updated participants
       };
     });
 
-      res.status(200).json({
-          message: "Tournaments retrieved successfully",
-          type: "success",
-          tournaments: updatedTournaments
-      });
+    res.status(200).json({
+      message: "Tournaments retrieved successfully",
+      type: "success",
+      tournaments: updatedTournaments
+    });
   } catch (error) {
-      res.status(500).json({ error: error.message, type: "error" });
+    res.status(500).json({ error: error.message, type: "error" });
   }
 };
-
 const addPigeon = async (req, res) => {
   const userId = req.userId;
 
@@ -490,11 +492,14 @@ const addPigeon = async (req, res) => {
           participants: {
             member: newPigeon._id,
             userName: name, // Save the name of the pigeon (participant)
+            phone,          // Save the phone number
+            avatar: pigeonAvatar, // Save the pigeon avatar
           },
         },
       },
       { new: true }
     );
+
 
     res.status(201).json({ message: "Pigeon added successfully and participant registered in tournament", type: "success" });
   } catch (error) {

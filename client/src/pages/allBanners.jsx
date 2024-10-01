@@ -15,6 +15,7 @@ export default function AllBanners() {
             try {
                 const data = await getheaders();
                 setHeaders(data.headers); // Set the array of headers
+                console.log(setHeaders(data.headers));
             } catch (err) {
                 setError(err.message || "Failed to fetch headers");
             }
@@ -32,7 +33,7 @@ export default function AllBanners() {
         return <Typography color="error">Error: {error}</Typography>;
     }
 
-    if (!headers.length) {
+    if (!headers) {
         return <Typography>Loading...</Typography>;
     }
 

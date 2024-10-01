@@ -18,6 +18,8 @@ app.use(cors(
 ));
 app.use(express.json());
 app.use('/public', express.static(path.join(__dirname, 'public')));
+//Routes usage
+app.use("/api/users", userRoutes);
 
 //Database Connection
 DB();
@@ -29,5 +31,3 @@ app.listen(PORT, () => {
 });
 
 
-//Routes usage
-app.use("/api/users", userRoutes);

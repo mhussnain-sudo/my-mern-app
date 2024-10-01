@@ -27,7 +27,7 @@ const HeaderComponent = () => {
     return <div>Error: {error}</div>;
   }
 
-  if (!headerData.length) {
+  if (!headerData) {
     return <div>Loading...</div>;
   }
 
