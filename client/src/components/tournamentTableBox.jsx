@@ -1,10 +1,11 @@
 import PropTypes from 'prop-types';
 import { Button } from "@mui/material";
-import DeleteForeverOutlinedIcon from '@mui/icons-material/DeleteForeverOutlined';
-import EditSharpIcon from '@mui/icons-material/EditSharp';
+import {Link} from 'react-router-dom'
 
-export default function TableBox({ headers, data, onEdit, onDelete }) {
+
+export default function TableBox({ headers, data }) {
     const baseURL = "http://localhost:3000";
+
 
     return (
         <div className="overflow-x-auto"> {/* Horizontal scroll for small screens */}
@@ -12,36 +13,36 @@ export default function TableBox({ headers, data, onEdit, onDelete }) {
                 <thead>
                     <tr>
                         {headers.map((header, index) => (
-                            <th 
-                                key={index} 
+                            <th
+                                key={index}
                                 className="border px-2 py-2 text-xs sm:text-sm md:text-base "
                             >
                                 {header}
                             </th>
                         ))}
-                        <th className="border px-2 py-2 text-xs sm:text-sm md:text-base ">
+                       {/* <th className="border px-2 py-2 text-xs sm:text-sm md:text-base ">
                             Actions
-                        </th>
+                        </th>*/}
                     </tr>
                 </thead>
                 <tbody>
                     {data.map((item, index) => (
-                        <tr 
-                            className="justify-center h-14 items-center content-center text-center border shadow-md gap-2" 
+                        <tr
+                            className="justify-center h-14 items-center content-center text-center border shadow-md gap-2"
                             key={index}
                         >
                             <td className="flex justify-center items-center">
                                 {item.tournamentImage ? (
-                                    <img 
-                                        src={`${baseURL}${item.tournamentImage}`} 
-                                        alt={`${item.tournamentName} Avatar`} 
+                                    <img
+                                        src={`${baseURL}${item.tournamentImage}`}
+                                        alt={`${item.tournamentName} Avatar`}
                                         className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-cover"
                                     />
                                 ) : (
-                                    <img 
-                                        src="/images/dummyavatar.jpg" 
-                                        alt="defaultAvatar" 
-                                        className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-cover" 
+                                    <img
+                                        src="/images/dummyavatar.jpg"
+                                        alt="defaultAvatar"
+                                        className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 object-cover"
                                     />
                                 )}
                             </td>
@@ -55,23 +56,23 @@ export default function TableBox({ headers, data, onEdit, onDelete }) {
                                 {item.date}
                             </td>
                             <td className="border px-2 py-2 text-xs sm:text-sm md:text-base ">
-                                <Button 
-                                    size="small" 
+                                <Button
+                                    size="small"
                                 >
-                                   <span className="text-sm"> Add Participant</span>
+                                   <Link className="text-sm" to="/create-PigeonsOwners"> Add Participant</Link>
                                 </Button>
                             </td>
                             <td className="border px-2 py-2 text-xs sm:text-sm md:text-base ">
                                 {item.status}
                             </td>
-                            <td className="justify-center items-center text-center border gap-2">
+                            {/*<td className="justify-center items-center text-center border gap-2">
                                 <Button onClick={() => onEdit(item)} sx={{ color: "blue" }}>
                                     <EditSharpIcon className="text-base" />
                                 </Button>
                                 <Button onClick={() => onDelete(item)} sx={{ color: "red" }}>
                                     <DeleteForeverOutlinedIcon className="text-base" />
                                 </Button>
-                            </td>
+                            </td>*/}
                         </tr>
                     ))}
                 </tbody>

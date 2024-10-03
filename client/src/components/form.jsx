@@ -30,14 +30,13 @@ const FormComponent = ({ onSubmit, fields }) => {
                     value={formData[field.name] || ''}
                     onChange={handleChange}
                     required
-                    className="w-full sm:w-72 lg:w-80" 
+                    className="w-full sm:w-72 lg:w-80"
                 />
             ))}
             <Button variant="contained" type="submit" className="w-full sm:w-72 lg:w-80">Submit</Button>
         </form>
     );
 };
-
 // Define prop types
 FormComponent.propTypes = {
     onSubmit: PropTypes.func.isRequired,
@@ -51,3 +50,5 @@ FormComponent.propTypes = {
 };
 
 export default FormComponent;
+
+

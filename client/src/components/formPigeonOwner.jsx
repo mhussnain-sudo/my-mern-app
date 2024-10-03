@@ -27,7 +27,7 @@ const FormPigeonOwnerComponent = ({ onSubmit, fields, formValues, onFormChange }
                     value={formValues[field.name] || ''}
                     onChange={handleChange}
                     required
-                    className="w-full sm:w-72 lg:w-80" 
+                    className="w-full sm:w-72 lg:w-80"
                 />
             ))}
             <Button variant="contained" type="submit" className="w-full sm:w-72 lg:w-80">Submit</Button>
@@ -50,3 +50,4 @@ FormPigeonOwnerComponent.propTypes = {
 };
 
 export default FormPigeonOwnerComponent;
+

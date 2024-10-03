@@ -1,20 +1,18 @@
-import { useEffect, useState } from 'react';
-import { getheaders } from '../apis/userApi';
-import Slider from 'react-slick';
-import 'slick-carousel/slick/slick.css';
+import { useEffect, useState } from 'react'; 
+import { getheaders } from '../apis/userApi'; 
+import Slider from 'react-slick'; 
+import 'slick-carousel/slick/slick.css'; 
 import 'slick-carousel/slick/slick-theme.css';
 
 const baseurl = "http://localhost:3000";
 
-const HeaderComponent = () => {
-  const [headerData, setHeaderData] = useState([]);
+const HeaderComponent = () => { 
+  const [headerData, setHeaderData] = useState([]); 
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    const getHeader = async () => {
-      try {
-        const data = await getheaders();
-        setHeaderData(data.headers); // Set the array of headers
+  useEffect(() => { const getHeader = async () => { 
+    try { const data = await getheaders(); 
+      setHeaderData(data.headers); // Set the array of headers
       } catch (err) {
         setError(err.message);
       }
@@ -27,7 +25,7 @@ const HeaderComponent = () => {
     return <div>Error: {error}</div>;
   }
 
-  if (!headerData) {
+  if (!headerData.length) {
     return <div>Loading...</div>;
   }
 
@@ -43,10 +41,10 @@ const HeaderComponent = () => {
   };
 
   return (
-    <div>
+    <div className="slider-container">
       <Slider {...settings}>
         {headerData.map(header => {
-          const imagePath = `${baseurl}${header.banner}`;
+          const imagePath =`${baseurl}${header.banner}`
           return (
             <div key={header._id}>
               <img src={imagePath} alt="Header Banner" className='w-full h-max object-cover' />
@@ -59,3 +57,4 @@ const HeaderComponent = () => {
 };
 
 export default HeaderComponent;
+

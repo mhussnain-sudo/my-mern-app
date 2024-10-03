@@ -11,7 +11,7 @@ const Login = () => {
     
 
     const fields = [
-        { name: 'email', type: 'email', placeholder: 'Email' },
+        { name: 'email', type: 'text', placeholder: 'Name' },
         { name: 'password', type: 'password', placeholder: 'Password' },
     ];
 

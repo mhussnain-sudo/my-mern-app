@@ -49,11 +49,12 @@ const registerUser = async (req, res) => {
     res.status(400).json({ message: error.message, type: "error" });
   }
 };
-
 //STEP 3 : login user
 const loginUser = async (req, res) => {
-  try {
+  console.log("login working at back")
+ try {
       const { email, password } = req.body;
+     console.log(req.body);
       const user = await Users.findOne({ email });
 
       if (!user) {
@@ -170,10 +171,16 @@ const header = async (req, res) => {
   }
 };
 
+
 //Get Header Banner
 const getheader = async (req, res) => {
   try {
       const headers = await Header.find(); // Fetch all headers
+
+      if (!headers.length) {
+          return res.status(404).json({ message: "No headers found", type: "error" });
+      }
+
       // Prepend the public prefix to the banner path for the frontend
       const headersWithPath = headers.map(header => ({
           ...header._doc,
@@ -201,20 +208,13 @@ const addClub = async (req, res) => {
       return res.status(403).json({ message: "Unauthorized", type: "error" });
     }
 
-    const { ownerName, clubName, email, password } = req.body;
-
-    // Validate required fields
-    if (!ownerName || !clubName || !email || !password) {
-      return res.status(400).json({ message: "All fields are required", type: "error" });
-    }
+    const { ownerName, password } = req.body;
 
 
 
     // Create a new club
     const newClub = new Club({
       ownerName,
-      clubName,
-      email,
       password,
       clubAvatar: req.file ? `clubAvatar/${req.file.filename}` : null, // Save the filename from multer
     });
@@ -222,7 +222,7 @@ const addClub = async (req, res) => {
     // Save the new club to the database
     await newClub.save();
 
-    res.status(201).json({ message: "Club added successfully", type: "success", club: newClub });
+    res.status(201).json({ message: "Member added successfully", type: "success", club: newClub });
   } catch (error) {
     res.status(500).json({ error: error.message, type: "error" });
   }
@@ -241,12 +241,12 @@ const getAllClubs = async (req, res) => {
       const clubs = await Club.find()
         .skip(skip)
         .limit(limitNumber)
-        .select('clubName ownerName email password clubAvatar');
+        .select('_id ownerName  password clubAvatar');
 
       const totalClubs = await Club.countDocuments();
 
       if (clubs.length === 0) {
-          return res.status(404).json({ message: "No clubs found", type: "info" });
+          return res.status(404).json({ message: "No Member found", type: "info" });
       }
 
       // Map over clubs to add public prefix to clubAvatar
@@ -256,7 +256,7 @@ const getAllClubs = async (req, res) => {
       }));
 
       res.status(200).json({
-          message: "Clubs retrieved successfully",
+          message: "Members retrieved successfully",
           type: "success",
           data: {
               clubs: clubsWithAvatar,
@@ -269,11 +269,12 @@ const getAllClubs = async (req, res) => {
       res.status(500).json({ error: error.message, type: "error" });
   }
 };
+
 const getClubs = async (req, res) => {
   try {
       // Fetch clubs with pagination
       const clubs = await Club.find()
-  
+
 
       const totalClubs = await Club.countDocuments();
 
@@ -309,8 +310,8 @@ const addTournament = async (req, res) => {
           numberOfHelperPigeons,
           numberOfLoftedPigeons,
           continueDays,
-          continueDates, 
-          prizes, 
+          continueDates,
+          prizes,
           numberOfPrizes
       } = req.body;
 
@@ -339,26 +340,26 @@ const addTournament = async (req, res) => {
 if (existingTournament) {
   return res.status(400).json({ message: "A tournament with this name already exists.", type: "error" });
 }
-      const newTournament = new Tournament({
-          tournamentImage,
-          tournamentName,
-          tournamentInfo,
-          date,
-          timeStart,
-          numberOfPigeons,
-          numberOfHelperPigeons,
-          numberOfLoftedPigeons,
-          continueDays,
-          continueDates: parsedContinueDates, // Properly formatted
-          prizes: parsedPrizes, // Properly formatted
-          numberOfPrizes
-      });
+const newTournament = new Tournament({
+  tournamentImage,
+  tournamentName,
+  tournamentInfo,
+  date,
+  timeStart,
+  numberOfPigeons,
+  numberOfHelperPigeons,
+  numberOfLoftedPigeons,
+  continueDays,
+  continueDates: parsedContinueDates, // Properly formatted
+  prizes: parsedPrizes, // Properly formatted
+  numberOfPrizes
+});
 
-      const savedTournament = await newTournament.save();
-      res.status(201).json(savedTournament);
-  } catch (error) {
-      res.status(500).json({ error: error.message });
-  }
+const savedTournament = await newTournament.save();
+res.status(201).json(savedTournament);
+} catch (error) {
+res.status(500).json({ error: error.message });
+}
 };
 
 
@@ -410,38 +411,39 @@ const getAllTournaments = async (req, res) => {
 
 const getEveryTournaments = async (req, res) => {
   try {
-    const tournaments = await Tournament.find();
 
-    if (tournaments.length === 0) {
-      return res.status(404).json({ message: "No tournaments found", type: "info" });
-    }
+      const tournaments = await Tournament.find()
 
-    // Add public prefix to tournamentImage and participants' avatars
+
+      if (tournaments.length === 0) {
+          return res.status(404).json({ message: "No tournaments found", type: "info" });
+      }
+    // Add public prefix to tournamentImage
     const updatedTournaments = tournaments.map(tournament => {
-      // Map over the participants to add the public prefix to their avatars
-      const updatedParticipants = tournament.participants.map(participant => {
-        return {
-          ...participant.toObject(), // Convert participant document to plain object
-          avatar: participant.avatar ? `public/${participant.avatar}` : null // Add public prefix to avatar
-        };
-      });
-
+      const updatedParticipants = tournament.participants.map(participant=>{
+       return{
+          ...participant.toObject(),
+          avatar: participant.avatar?`public/${participant.avatar}`:null
+};
+});
       return {
-        ...tournament.toObject(), // Convert tournament document to plain object
-        tournamentImage: `public/${tournament.tournamentImage}`, // Add public prefix to tournament image
-        participants: updatedParticipants // Include updated participants
-      };
+        ...tournament.toObject(), // Convert mongoose document to plain object
+        tournamentImage: `public/${tournament.tournamentImage}`, // Assuming you have a PUBLIC_URL in your environment variables
+        participants:updatedParticipants
+};
     });
 
-    res.status(200).json({
-      message: "Tournaments retrieved successfully",
-      type: "success",
-      tournaments: updatedTournaments
-    });
+      res.status(200).json({
+          message: "Tournaments retrieved successfully",
+          type: "success",
+          tournaments: updatedTournaments
+      });
   } catch (error) {
-    res.status(500).json({ error: error.message, type: "error" });
+      res.status(500).json({ error: error.message, type: "error" });
   }
 };
+
+
 const addPigeon = async (req, res) => {
   const userId = req.userId;
 
@@ -484,27 +486,26 @@ const addPigeon = async (req, res) => {
     // Save the new pigeon to the database
     await newPigeon.save();
 
-    // Update the tournament to add the new participant's name
-    await Tournament.findByIdAndUpdate(
-      tournament._id, // Use the found tournament ID
-      {
-        $push: {
-          participants: {
-            member: newPigeon._id,
-            userName: name, // Save the name of the pigeon (participant)
-            phone,          // Save the phone number
-            avatar: pigeonAvatar, // Save the pigeon avatar
-          },
-        },
-      },
-      { new: true }
-    );
+ // Update the tournament to add the new participant's name
+ await Tournament.findByIdAndUpdate(
+  tournament._id, // Use the found tournament ID
+  {
+    $push: {
+      participants: {
+        member: newPigeon._id,
+        userName: name, // Save the name of the pigeon (participant)
+        phone,
+        avatar:pigeonAvatar,
+},
+    },
+  },
+  { new: true }
+);
 
-
-    res.status(201).json({ message: "Pigeon added successfully and participant registered in tournament", type: "success" });
-  } catch (error) {
-    res.status(500).json({ error: error.message, type: "error" });
-  }
+res.status(201).json({ message: "Pigeon added successfully and participant registered in tournament", type: "success" });
+} catch (error) {
+res.status(500).json({ error: error.message, type: "error" });
+}
 };
 
 
@@ -550,6 +551,7 @@ const addPigeonResult = async (req, res) => {
       });
   }
 };
+
 
 const getPigeonResult = async (req,res)=>{
   try {

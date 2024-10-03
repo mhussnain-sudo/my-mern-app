@@ -38,6 +38,7 @@ const FormPigeonComponent = ({ onSubmit, fields }) => {
         setDailyResults([{ date: '', results: [{ pigeonNo: '', returnTime: '' }] }]); // Reset daily results
     };
 
+
     return (
         <form className="flex flex-col p-4 justify-center items-center gap-2" onSubmit={handleSubmit}>
             {fields.map((field) => (
@@ -72,7 +73,7 @@ const FormPigeonComponent = ({ onSubmit, fields }) => {
                         required
                         className="w-full md:w-3/4 mb-2"
                     />
-                    {day.results.map((result, resultIndex) => (
+ {day.results.map((result, resultIndex) => (
                         <div key={resultIndex} className="flex gap-2">
                             <TextField
                                 variant="outlined"
@@ -111,6 +112,7 @@ const FormPigeonComponent = ({ onSubmit, fields }) => {
     );
 };
 
+
 // Define prop types
 FormPigeonComponent.propTypes = {
     onSubmit: PropTypes.func.isRequired,
@@ -128,3 +130,4 @@ FormPigeonComponent.propTypes = {
 };
 
 export default FormPigeonComponent;
+

@@ -4,7 +4,7 @@ import { getAllClubs, deleteClub } from '../apis/userApi';
 import Pagination from '../components/pagination';
 
 export default function AllClubs() {
-    const headers = ["Avatar", "Club Name", "Owner Name", "Email", "Password"];
+    const headers = ["Avatar","Member ID" ,"Member Name", "Password"];
     const [data, setData] = useState([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(0);
@@ -46,18 +46,18 @@ export default function AllClubs() {
     return (
         <div className="flex flex-col px-4 gap-5">
             <div className="border shadow-lg w-full p-3">
-                <h1 className="font-bold font-mono text-2xl">All Clubs</h1>
+                <h1 className="font-bold font-mono text-2xl">All Members</h1>
             </div>
             {loading ? (
                 <p>Loading...</p>
             ) : (
                 <>
                     {data.length > 0 ? (
-                        <TableBox 
-                            headers={headers} 
-                            data={data} 
-                            onEdit={handleEdit} 
-                            onDelete={handleDelete} 
+                        <TableBox
+                            headers={headers}
+                            data={data}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
                         />
                     ) : (
                         <p>No clubs found.</p>

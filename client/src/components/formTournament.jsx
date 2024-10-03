@@ -43,10 +43,12 @@ const FormTournamentComponent = ({ onSubmit, fields, numberOfPrizes, setNumberOf
         }
     };
 
+
+
     const handlePrizeChange = (e) => {
         const value = e.target.value;
         const parsedValue = parseInt(value, 10);
-     
+
         if (value === '') {
             setNumberOfPrizes('');
             setPrizes(['']); // Reset prizes if the input is empty
@@ -60,13 +62,13 @@ const FormTournamentComponent = ({ onSubmit, fields, numberOfPrizes, setNumberOf
             setPrizes(prevPrizes => Array.from({ length: numberOfPrizes }, (_, index) => prevPrizes[index] || ''));
         }
     };
-    
+
     const handleDateChange = (index, value) => {
         const newDates = [...selectedDates];
         newDates[index] = value; // Date strings should be valid
         setSelectedDates(newDates);
     };
-    
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -83,6 +85,7 @@ const FormTournamentComponent = ({ onSubmit, fields, numberOfPrizes, setNumberOf
         e.target.showPicker();
     };
 
+
     return (
         <form className="flex flex-col p-4 justify-center items-center gap-2" onSubmit={handleSubmit}>
             {fields.map((field) => (
@@ -94,10 +97,10 @@ const FormTournamentComponent = ({ onSubmit, fields, numberOfPrizes, setNumberOf
                             onClick={() => document.getElementById(field.name).click()}
                         >
                             {imagePreview ? (
-                                <img 
-                                    src={imagePreview} 
-                                    alt="Preview" 
-                                    className="h-full w-full object-contain rounded-md" 
+                                <img
+                                    src={imagePreview}
+                                    alt="Preview"
+                                    className="h-full w-full object-contain rounded-md"
                                 />
                             ) : (
                                 <span className="text-gray-500">Click to upload image</span>
@@ -129,8 +132,8 @@ const FormTournamentComponent = ({ onSubmit, fields, numberOfPrizes, setNumberOf
                 )
             ))}
 
-            {/* Max Prizes Input */}
-            <TextField
+    {/* Max Prizes Input */}
+    <TextField
                 variant="outlined"
                 size="small"
                 type="number"
@@ -141,7 +144,7 @@ const FormTournamentComponent = ({ onSubmit, fields, numberOfPrizes, setNumberOf
                 inputProps={{ min: 1, max: 15 }} // Set min and max for input
                 className="w-full md:w-3/4"
             />
-            
+
             {/* Render Prize Fields */}
             {Array.from({ length: numberOfPrizes }).map((_, index) => (
                 <TextField
@@ -173,7 +176,7 @@ const FormTournamentComponent = ({ onSubmit, fields, numberOfPrizes, setNumberOf
                 required
                 className="w-full md:w-3/4"
             />
-            
+
             {/* Selected Dates Fields */}
             {Array.from({ length: continueDays }).map((_, index) => (
                 <TextField
@@ -212,3 +215,4 @@ FormTournamentComponent.propTypes = {
 };
 
 export default FormTournamentComponent;
+

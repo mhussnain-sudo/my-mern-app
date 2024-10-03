@@ -10,19 +10,12 @@ const clubSchema = new Schema({
         type: String,
         required: true,
     },
-    clubName: {
-        type: String,
-        required: true,
-    },
-    email: {
-        type: String, 
-        required: true,
-    },
     password: {
-        type: String, 
+        type: String,
         required: true,
     },
 }, { timestamps: true });
 
 const Club = mongoose.model('clubs',clubSchema);
 module.exports = Club
+

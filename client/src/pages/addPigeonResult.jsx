@@ -33,6 +33,7 @@ export default function AddPigeonResult() {
         fetchTournaments();
     }, []);
 
+
     const handleTournamentChange = (event, value) => {
         setSelectedTournament(value);
         if (value) {
@@ -84,21 +85,21 @@ export default function AddPigeonResult() {
             toast.error("Please select a valid participant.");
             return;
         }
-    
+
         // Define mainPigeonResults
         const mainPigeonResults = pigeonData.map(pigeon => ({
             pigeonNo: pigeon.pigeonNo,
             returnTime: pigeon.returnTime
         }));
-    
+
         // Define continuousResults
         const continuousResults = Object.entries(continuousPigeonData).map(([dateId, pigeons]) => {
             const dateObject = selectedTournament.continueDates.find(dateObj => dateObj._id === dateId);
-            
+
             if (!dateObject) {
                 return null; // Handle case where the date isn't found
             }
-    
+
             const dateString = dateObject.date; // This is the continuous date
             return {
                 date: dateString,
@@ -108,7 +109,7 @@ export default function AddPigeonResult() {
                 }))
             };
         }).filter(Boolean); // Remove any null values
-    
+
         const formattedResults = [
             {
                 date: new Date(selectedTournament.date).toISOString().split('T')[0],
@@ -116,7 +117,7 @@ export default function AddPigeonResult() {
             },
             ...continuousResults
         ];
-    
+
         console.log("Data being sent to API:", {
             tournamentName: selectedTournament?.tournamentName,
             userName: selectedName.userName,
@@ -124,7 +125,7 @@ export default function AddPigeonResult() {
             numberOfPigeons,
             results: formattedResults
         });
-    
+
         try {
             await addPigeonResult(
                 selectedTournament.tournamentName,
@@ -133,15 +134,14 @@ export default function AddPigeonResult() {
                 numberOfPigeons,
                 formattedResults
             );
-    
+
             toast.success("Results created successfully!");
         } catch (error) {
             console.error("Error adding pigeon results:", error);
             toast.error("Error adding pigeon results: " + error.message);
         }
     };
-    
-    
+
     return (
         <div className="flex flex-col px-4 gap-10">
             <ToastContainer />
@@ -180,8 +180,7 @@ export default function AddPigeonResult() {
                 style={{ marginBottom: '16px' }}
                 disabled={!selectedTournament}
             />
-
-            {selectedTournament && (
+ {selectedTournament && (
                 <div style={{ marginTop: '16px' }}>
                     <TextField
                         label="Start Date"
@@ -215,7 +214,8 @@ export default function AddPigeonResult() {
                         </div>
                     ))}
 
-                    {selectedTournament.continueDates.map((dateObj) => (
+
+{selectedTournament.continueDates.map((dateObj) => (
                         <div key={dateObj._id} style={{ marginBottom: '16px' }}>
                             <TextField
                                 label={`Continuous Date ${new Date(dateObj.date).toLocaleDateString()}`}
@@ -257,3 +257,4 @@ export default function AddPigeonResult() {
         </div>
     );
 }
+

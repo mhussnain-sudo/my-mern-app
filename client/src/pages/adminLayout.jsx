@@ -1,7 +1,7 @@
 // AdminLayout.jsx
 
 import PropTypes from 'prop-types'; // Import PropTypes
-import Sidebar from '../components/adminNavbarDropper'; // Adjust the path as needed
+import SidebarComponent from '../components/adminNavbarDropper'; // Adjust the path as needed
 import AdminNavbar from '../components/adminNavbar';
 const AdminLayout = ({ children }) => {
     return (
@@ -9,7 +9,7 @@ const AdminLayout = ({ children }) => {
         <AdminNavbar/>
         <div className="flex flex-col  md:flex-row ">
            
-            <Sidebar />
+            <SidebarComponent />
             <div className="md:flex-1 xl:flex-1 bg-slate-50 mt-2 ">
                 {children}
             </div>

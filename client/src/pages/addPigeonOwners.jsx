@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import FormPigeonOwnerComponent from '../components/formPigeonOwner';
-import { addPigeonOwner, getEveryTournament } from '../apis/userApi'; 
+import { addPigeonOwner, getEveryTournament } from '../apis/userApi';
 import { IconButton } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
@@ -37,6 +37,8 @@ export default function CreatePigeonOwners() {
 
         fetchTournaments();
     }, []);
+
+
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
@@ -84,16 +86,16 @@ export default function CreatePigeonOwners() {
             <div className="flex justify-center items-center">
                 <div className="flex flex-col border rounded-lg shadow-lg py-16 px-8 text-center justify-center items-center gap-8">
                     <div>
-                        <input 
-                            type="file" 
-                            accept="image/jpeg,image/png" 
-                            onChange={handleFileChange} 
+                        <input
+                            type="file"
+                            accept="image/jpeg,image/png"
+                            onChange={handleFileChange}
                             style={{ display: 'none' }}
                             id="avatar-upload"
                         />
                         <label htmlFor="avatar-upload">
                             <IconButton component="span">
-                                <Avatar 
+                                <Avatar
                                     src={avatarPreview || '/default-avatar.png'}
                                     sx={{ width: 56, height: 56 }}
                                 >
@@ -116,8 +118,8 @@ export default function CreatePigeonOwners() {
                         )}
                         style={{ width: '100%' }}
                     />
-                    <FormPigeonOwnerComponent 
-                        onSubmit={handleSubmit} 
+     <FormPigeonOwnerComponent
+                        onSubmit={handleSubmit}
                         fields={[
                             { name: 'name', type: 'text', placeholder: 'Enter Name' },
                             { name: 'phone', type: 'text', placeholder: 'Enter Phone' },
@@ -131,3 +133,4 @@ export default function CreatePigeonOwners() {
         </div>
     );
 }
+

@@ -1,30 +1,13 @@
 import { useEffect, useState } from 'react';
-import { getEveryTournament, getPigeonResult } from '../apis/userApi';
-import Autocomplete from '@mui/material/Autocomplete';
-import TextField from '@mui/material/TextField';
+import PropTypes from 'prop-types';
+import { getPigeonResult } from '../apis/userApi';
 
-const Navbar2 = () => {
-
-const baseurl = 'http://localhost:3000/';
-    const [tournaments, setTournaments] = useState([]);
-    const [selectedTournament, setSelectedTournament] = useState(null);
+const Navbar2 = ({ selectedTournament }) => {
+    const baseurl = 'http://localhost:3000/';
     const [pigeonResults, setPigeonResults] = useState([]);
     const [selectedDate, setSelectedDate] = useState(null);
 
     useEffect(() => {
-        const fetchTournaments = async () => {
-            try {
-                const response = await getEveryTournament();
-                if (response.tournaments && Array.isArray(response.tournaments)) {
-                    setTournaments(response.tournaments);
-                } else {
-                    setTournaments([]);
-                }
-            } catch (error) {
-                console.error("Error fetching tournaments:", error);
-            }
-        };
-
         const fetchPigeonResults = async () => {
             try {
                 const results = await getPigeonResult();
@@ -39,14 +22,8 @@ const baseurl = 'http://localhost:3000/';
             }
         };
 
-        fetchTournaments();
         fetchPigeonResults();
     }, []);
-
-    const handleTournamentChange = (event, value) => {
-        setSelectedTournament(value);
-        setSelectedDate(null); // Reset selected date when changing tournament
-    };
 
     const currentPigeonResults = selectedTournament
         ? pigeonResults.find(result => result.tournamentName === selectedTournament.tournamentName)
@@ -65,7 +42,7 @@ const baseurl = 'http://localhost:3000/';
 
     const calculateTotalTime = (startTime, returnTimes) => {
         const [initialStartHours, initialStartMinutes] = startTime.split(":").map(Number);
-        let totalDurationMs = 0; // Accumulate total duration in milliseconds
+        let totalDurationMs = 0;
 
         returnTimes.forEach(returnTime => {
             const [returnHours, returnMinutes] = returnTime.split(":").map(Number);
@@ -83,34 +60,27 @@ const baseurl = 'http://localhost:3000/';
 
     return (
         <div className="flex flex-col p-4">
-            <div>
-                <Autocomplete
-                    options={tournaments}
-                    getOptionLabel={(option) => option.tournamentName || ""}
-                    onChange={handleTournamentChange}
-                    renderInput={(params) => <TextField {...params} label="Select Tournament" />}
-                    style={{ marginBottom: '16px' }}
-                />
-            </div>
-            <div className="flex flex-col text-center mb-4">
-                <h2 className="text-lg font-semibold">Start Time</h2>
-                <p className="text-blue-600 font-bold text-4xl">
-                    {selectedTournament 
-                        ? selectedTournament.timeStart 
-                        : 'Select a tournament to see the start time.'}
-                </p>
+            <div className='flex flex-col md:flex-row gap-2'>
+                <div className="flex flex-col md:flex-row w-full border rounded-[100px]  p-2 justify-start">
+                    <div className='flex w-full md:w-2/3 items-center text-center px-4'>
+                        <p>{selectedTournament.tournamentName}</p>
+                    </div>
+                    <div className="flex w-full md:w-1/3 items-center text-center gap-1 px-4">
+                        <span>Start Time: </span>
+                        <span>{selectedTournament.timeStart}</span>
+                    </div>
+                </div>
             </div>
 
             {selectedTournament && currentPigeonResults && (
-                <div>
-                    {/* Date Navigation Bar */}
-                    <div className="flex space-x-2 mb-4">
+                <div className="flex flex-col py-4 gap-1">
+                    <div className="flex flex-wrap gap-1 m-3">
                         {currentPigeonResults.pigeonResults.map((pigeonResult, index) => {
                             const date = formatDate(pigeonResult.date);
                             return (
                                 <button
                                     key={index}
-                                    className={`p-2 border rounded ${selectedDate === date ? 'bg-blue-600 text-white' : 'bg-gray-200 text-black'}`}
+                                    className={`p-2 border border-blue-600 rounded ${selectedDate === date ? 'bg-blue-600 text-white' : 'bg-white text-blue-600 hover:bg-blue-600 hover:text-white'}`}
                                     onClick={() => handleDateSelect(date)}
                                 >
                                     {date}
@@ -119,74 +89,61 @@ const baseurl = 'http://localhost:3000/';
                         })}
                     </div>
 
-                    {/* Pigeon Results Table */}
                     {selectedDate && (
                         <div className="overflow-x-auto mb-4">
                             <table className="min-w-full border-collapse border text-center border-gray-300">
                                 <thead>
-                                    <tr className="bg-gray-100">
-                                        <th className="border border-gray-300 p-2">Sr. No</th>
-                                        <th className="border border-gray-300 p-2">Participants</th>
-                                        <th className="border border-gray-300 p-2">Total Pigeons</th>
+                                    <tr className="bg-black">
+                                        <th className="border border-gray-300 p-2 text-white">Sr. No</th>
+                                        <th className="border border-gray-300 p-2 text-white">Participants</th>
+                                        <th className="border border-gray-300 p-2 text-white">Total Pigeons</th>
                                         {currentPigeonResults.pigeonResults
                                             .find(result => formatDate(result.date) === selectedDate)
                                             ?.results.map((res, index) => (
-                                                <th key={res.pigeonNo} className="border border-gray-300 p-2">{`#${index + 1}`}</th>
+                                                <th key={res.pigeonNo} className="border border-gray-300 p-2 text-white">{`#${index + 1}`}</th>
                                             ))}
-                                        <th className="border border-gray-300 p-2">Total Time</th>
+                                        <th className="border border-gray-300 p-2 text-white">Total Time</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-    {selectedTournament.participants.map((participant, pIndex) => {
-        console.log(selectedTournament.participants)
-        const resultsForDate = currentPigeonResults.pigeonResults
-            .filter(result => formatDate(result.date) === selectedDate)
-            .find(result => result.participantId === participant.id)?.results || [];
+                                    {selectedTournament.participants.map((participant, pIndex) => {
+                                        const resultsForDate = currentPigeonResults.pigeonResults
+                                            .filter(result => formatDate(result.date) === selectedDate)
+                                            .find(result => result.participantId === participant.id)?.results || [];
 
-        // Collect all return times
-        const returnTimes = resultsForDate.map(res => res.returnTime);
+                                        const returnTimes = resultsForDate.map(res => res.returnTime);
+                                        const totalTime = calculateTotalTime(selectedTournament.timeStart, returnTimes);
+                                        const totalPigeons = resultsForDate.length;
 
-        // Calculate total time from tournament start to each return time
-        const totalTime = calculateTotalTime(selectedTournament.timeStart, returnTimes);
-
-        // Get the total number of pigeons for this participant
-        const totalPigeons = resultsForDate.length;
-        
-
-        return (
-            <tr key={pIndex}>
-                <td className="border border-gray-300 p-2">{pIndex + 1}</td>
-                <td className=" flex justify-center border  border-gray-300 p-2">
-                    {participant.avatar ? (
-                       
-                        <img
-                            src={`${baseurl}${participant.avatar}`}
-                            alt={`${participant.userName}'s avatar`}
-                            className="w-12 h-12 rounded-full mr-2"
-                        />
-                    ) : (
-                        <div className="w-12 h-12 rounded-full bg-gray-200 mr-2"></div> // Placeholder if avatar is null
-                    )}
-                    <div className=" flex flex-col">
-                        <div>
-                    {participant.userName}
-                    </div>
-                    <div>
-                    {participant.phone}
-                    </div>
-                    </div>
-                </td>
-                <td className="border border-gray-300 p-2">{totalPigeons}</td>
-                {resultsForDate.map((res, rIndex) => (
-                    <td key={`${participant.name}-${rIndex}`} className="border border-gray-300 p-2">
-                        {res.participantId === participant.id ? res.returnTime : "N/A"}
-                    </td>
-                ))}
-                <td className="border border-gray-300 p-2">{totalTime}</td>
-            </tr>
-        );
-    })}
-</tbody>
+                                        return (
+                                            <tr key={pIndex}>
+                                                <td className="border border-gray-300 p-2">{pIndex + 1}</td>
+                                                <td className="flex flex-col md:flex-row content-center items-center justify-center border border-gray-300 p-2">
+                                                    {participant.avatar ? (
+                                                        <img
+                                                            src={`${baseurl}${participant.avatar}`}
+                                                            alt={`${participant.userName}'s avatar`}
+                                                            className="w-12 h-12 rounded-full mr-2"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-12 h-12 rounded-full bg-gray-200 mr-2"></div>
+                                                    )}
+                                                    <div className="flex flex-col">
+                                                        <div>{participant.userName}</div>
+                                                        <div>{participant.phone}</div>
+                                                    </div>
+                                                </td>
+                                                <td className="border border-gray-300 p-2">{totalPigeons}</td>
+                                                {resultsForDate.map((res, rIndex) => (
+                                                    <td key={`${participant.name}-${rIndex}`} className="border border-gray-300 p-2">
+                                                        {res.participantId === participant.id ? res.returnTime : "N/A"}
+                                                    </td>
+                                                ))}
+                                                <td className="border border-gray-300 p-2">{totalTime}</td>
+                                            </tr>
+                                        );
+                                    })}
+                                </tbody>
                             </table>
                         </div>
                     )}
@@ -194,6 +151,23 @@ const baseurl = 'http://localhost:3000/';
             )}
         </div>
     );
+};
+
+// Prop Types validation
+Navbar2.propTypes = {
+    selectedTournament: PropTypes.shape({
+        _id: PropTypes.string.isRequired,
+        tournamentName: PropTypes.string.isRequired,
+        timeStart: PropTypes.string.isRequired,
+        participants: PropTypes.arrayOf(
+            PropTypes.shape({
+                id: PropTypes.string.isRequired,
+                userName: PropTypes.string.isRequired,
+                avatar: PropTypes.string,
+                phone: PropTypes.string,
+            })
+        ).isRequired,
+    }).isRequired,
 };
 
 export default Navbar2;

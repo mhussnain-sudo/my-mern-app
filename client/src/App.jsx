@@ -31,8 +31,8 @@ function App() {
                 <Route path="/admin-dashboard" element={user && user.role === "admin" ? <AdminLayout><AdminDashboard /></AdminLayout> : <Navigate to="/" />} />
                 <Route path="/clubowner-dashboard" element={user && user.role === "clubowner" ? <AdminLayout><ClubDashboard /></AdminLayout> : <Navigate to="/" />} />
 
-                <Route path="/all-clubs" element={user && user.role === "admin" ? <AdminLayout><AllClubs /></AdminLayout> : <Navigate to="/" />} />
-                <Route path="/create-club" element={user && user.role === "admin" ? <AdminLayout><CreateClub /></AdminLayout> : <Navigate to="/" />} />
+                <Route path="/all-members" element={user && user.role === "admin" ? <AdminLayout><AllClubs /></AdminLayout> : <Navigate to="/" />} />
+                <Route path="/create-members" element={user && user.role === "admin" ? <AdminLayout><CreateClub /></AdminLayout> : <Navigate to="/" />} />
                 <Route path="/all-tournaments" element={user && user.role === "admin" ? <AdminLayout><AllTournaments /></AdminLayout> : <Navigate to="/" />} />
                 <Route path="/create-tournaments" element={user && user.role === "admin" ? <AdminLayout><CreateTournaments /></AdminLayout> : <Navigate to="/" />} />
                 <Route path="/add-PigeonsResult" element={user && (user.role === "admin" || user.role === "clubowner") ? <AdminLayout><AddPigeonsResult /></AdminLayout> : <Navigate to="/" />} />

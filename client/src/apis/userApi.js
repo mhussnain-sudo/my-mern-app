@@ -1,10 +1,15 @@
 import Axios from 'axios'
 
 const api = Axios.create({
-    baseURL: "http://localhost:3000/api", // Use the env variable
+    baseURL:"http://localhost:3000/api", // Use the env variable
   });
+export const setrole = async(role)=>{
+  return  await api.post('/users/set-role',{role})
+}
+
 
   export const login = async (email, password) => {
+   console.log('login api hit')
     return await api.post('/users/login', { email, password });
 };
 
@@ -32,88 +37,86 @@ export const postHeader = async (formData) => {
               'Authorization': `Bearer ${token}` // Attach the token
           }
       });
-      return response.data; 
-  } catch (error) {
-      console.error('API Error:', error); 
-      if (error.response) {
-          throw error.response.data; 
-      } else {
-          throw { message: "Network error occurred" }; 
-      }
-  }
-};
-
-export const getheaders = async () => {
-  try {
-      const response = await api.get('/users/header'); // Adjust the endpoint as necessary
       return response.data;
-    
- // Ensure this matches your expected structure
   } catch (error) {
       console.error('API Error:', error);
       if (error.response) {
-          throw error.response.data; 
+          throw error.response.data;
       } else {
-          throw { message: "Network error occurred" }; 
+          throw { message: "Network error occurred" };
       }
   }
 };
 
-export const getAllClubs = async (page = 1, limit = 10) => {
-  try {
-      const response = await api.get(`/users/all-Clubs?page=${page}&limit=${limit}`);
-      return response.data; // Ensure your API returns { clubs: [], totalPages: number }
-  } catch (error) {
-      throw error.response.data; 
-  }
-};
-export const getClubs = async () => {
+
+
+export const getheaders = async () => {
     try {
-        const response = await api.get(`/users/Clubs`);
-        return response.data.data; // Adjust this to access the clubs properly
+        const response = await api.get('/users/header'); // Adjust the endpoint as necessary
+       console.log(response);
+   return response.data;
+   // Ensure this matches your expected structure
     } catch (error) {
-        throw error.response.data; 
+        console.error('API Error:', error);
+        if (error.response) {
+            throw error.response.data;
+        } else {
+            throw { message: "Network error occurred" };
+        }
     }
-};
-
-export const addClub = async (clubName, ownerName, email, password, clubAvatar) => {
-  try {
-      const token = localStorage.getItem('token');
-      const formData = new FormData(); // Create a FormData object
-      formData.append('clubName', clubName);
-      formData.append('ownerName', ownerName);
-      formData.append('email', email);
-      formData.append('password', password);
-      if (clubAvatar) {
-          formData.append('clubAvatar', clubAvatar); // Append the avatar file
+  };
+  
+  export const getAllClubs = async (page = 1, limit = 10) => {
+    try {
+        const response = await api.get(`/users/all-Clubs?page=${page}&limit=${limit}`);
+        return response.data; // Ensure your API returns { clubs: [], totalPages: number }
+    } catch (error) {
+        throw error.response.data;
+    }
+  };
+  export const getClubs = async () => {
+      try {
+          const response = await api.get(`/users/Clubs`);
+          return response.data.data; // Adjust this to access the clubs properly
+      } catch (error) {
+          throw error.response.data;
       }
-
-      const response = await api.post('/users/add-Club', formData, {
-          headers: {
-              Authorization: `Bearer ${token}`,
-              'Content-Type': 'multipart/form-data' // Set content type for FormData
-          }
-      });
-      return response.data;
-  } catch (error) {
-      throw error.response.data; // Log the error message
-  }
-};
-export const deleteClub = async ()=>{
+  };
+  export const addClub = async (ownerName, password, clubAvatar) => {
     try {
         const token = localStorage.getItem('token');
-        const response = await api.delete('/users/delete-club', {
+        const formData = new FormData(); // Create a FormData object
+        formData.append('ownerName', ownerName);
+        formData.append('password', password);
+        if (clubAvatar) {
+            formData.append('clubAvatar', clubAvatar); // Append the avatar file
+        }
+  
+        const response = await api.post('/users/add-Club', formData, {
             headers: {
-                Authorization: `Bearer ${token}`
+                Authorization: `Bearer ${token}`,
+                'Content-Type': 'multipart/form-data' // Set content type for FormData
             }
         });
         return response.data;
     } catch (error) {
         throw error.response.data; // Log the error message
     }
-}
-
-export const addTournament = async (formData)=>{
+  };
+  export const deleteClub = async ()=>{
+      try {
+          const token = localStorage.getItem('token');
+          const response = await api.delete('/users/delete-club', {
+              headers: {
+                  Authorization: `Bearer ${token}`
+              }
+          });
+          return response.data;
+      } catch (error) {
+          throw error.response.data; // Log the error message
+      }
+  }
+  export const addTournament = async (formData)=>{
     try {
         const token = localStorage.getItem('token');
         const response = await api.post(`/users/add-Tournament`, formData, {
@@ -132,13 +135,13 @@ export const getAllTournaments = async (page = 1, limit = 10) => {
     try {
         const token = localStorage.getItem('token');
         const response = await api.get(`/users/all-Tournaments?page=${page}&limit=${limit}`, {
-            
+
             headers: {
                 Authorization: `Bearer ${token}`
             }
         });
         return response.data;
-        
+
     } catch (error) {
         throw error.response.data;
     }
@@ -146,20 +149,17 @@ export const getAllTournaments = async (page = 1, limit = 10) => {
 
 export const getEveryTournament = async ()=>{
     try {
-        const token = localStorage.getItem('token');
+    
         const response = await api.get('/users/every-tournament', {
-            
-            headers: {
-                Authorization: `Bearer ${token}`
-            }
+
+       
         });
         return response.data;
-        
+
     } catch (error) {
         throw error.response.data;
     }
 }
-
 export const deleteTournaments = async ()=>{
     try {
         const token = localStorage.getItem('token');
@@ -185,7 +185,7 @@ export const addPigeonOwner = async (tournamentName, name, phone, city, pigeonAv
         if (pigeonAvatar) {
             formData.append('pigeonAvatar', pigeonAvatar); // Append the avatar file
         }
-  
+
         const response = await api.post('/users/add-pigeon', formData, {
             headers: {
                 Authorization: `Bearer ${token}`,
@@ -201,7 +201,7 @@ export const addPigeonOwner = async (tournamentName, name, phone, city, pigeonAv
   export const addPigeonResult = async (tournamentName, name, startTime, numberOfPigeons, pigeonResults) => {
     try {
         const token = localStorage.getItem('token');
-        
+
         const formData = {
             tournamentName,
             name,
@@ -216,7 +216,7 @@ export const addPigeonOwner = async (tournamentName, name, phone, city, pigeonAv
                 'Content-Type': 'application/json'
             }
         });
-        
+
         return response.data; // Return the successful response data
     } catch (error) {
         console.error('Error adding pigeon results:', error);
@@ -240,3 +240,5 @@ export const getPigeonResult =async()=>{
         throw error.response.data;
     }
 }
+
+

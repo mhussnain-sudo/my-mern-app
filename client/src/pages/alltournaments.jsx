@@ -54,11 +54,11 @@ export default function AllTournaments() {
             ) : (
                 <>
                     {data.length > 0 ? (
-                        <TableBox 
-                            headers={headers} 
-                            data={data} 
-                            onEdit={handleEdit} 
-                            onDelete={handleDelete} 
+                        <TableBox
+                            headers={headers}
+                            data={data}
+                            onEdit={handleEdit}
+                            onDelete={handleDelete}
                         />
                     ) : (
                         <p>No tournaments found.</p>

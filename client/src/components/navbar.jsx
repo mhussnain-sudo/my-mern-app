@@ -1,31 +1,30 @@
 import { useEffect, useState } from 'react';
-import { getClubs } from '../apis/userApi';
-import { GrHomeRounded } from "react-icons/gr";
+import { getEveryTournament } from '../apis/userApi';
 import { BsPerson } from "react-icons/bs";
+import { GrHomeRounded } from "react-icons/gr";
 import { Link } from 'react-router-dom';
+import Navbar2 from './navbar2'; // Import Navbar2 component
 
 export default function Navbar() {
-    const [clubs, setClubs] = useState([]);
+    const [tournaments, setTournaments] = useState([]);
+    const [selectedTournament, setSelectedTournament] = useState(null);
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const fetchClubs = async () => {
-            console.log('Fetching');
+        const fetchTournaments = async () => {
             try {
-                const data = await getClubs();
-                console.log("Clubs Data:", data);
-                
-                if (data && data.clubs) {
-                    setClubs(data.clubs);
+                const data = await getEveryTournament();
+                if (data && data.tournaments) {
+                    setTournaments(data.tournaments);
                 } else {
-                    setClubs([]);
+                    setTournaments([]);
                 }
             } catch (err) {
                 setError(err.message);
             }
         };
 
-        fetchClubs();
+        fetchTournaments();
     }, []);
 
     if (error) {
@@ -33,28 +32,37 @@ export default function Navbar() {
     }
 
     return (
-        <div className="flex flex-col justify-between bg-slate-500 p-4 gap-1">
-            <div className="flex items-center justify-between w-full px-5 ">
-                <Link className='text-white text-2xl font-bold' to="/">
-                    <GrHomeRounded />
+        <div className='flex flex-col'>
+        <div className="flex flex-col md:flex-row justify-between bg-blue-800 p-4 gap-1">
+            <div className="flex items-center justify-between px-5 gap-1">
+                <Link className='text-white text-lg' to="/">
+                    <div className="flex justify-center items-center gap-1">
+                        <GrHomeRounded /> Home
+                    </div>
                 </Link>
-                <Link className='text-white text-2xl font-bold' to="/login">
-                    <BsPerson />
+                <Link className="text-white text-lg" to="/login">
+                    <div className="flex justify-center items-center"> <BsPerson /> Login </div>
                 </Link>
             </div>
             <div className="flex flex-wrap justify-center mt-4 md:mt-0">
-                {clubs.length > 0 ? (
-                    clubs.map((club) => (
-                        <div key={club._id} className="p-2 text-center w-max">
-                            <Link to={`/clubs/${club._id}`} className="text-white font-semibold hover:text-yellow-500">
-                                {club.clubName}
-                            </Link>
+                {tournaments.length > 0 ? (
+                    tournaments.map((tournament) => (
+                        <div key={tournament._id} className="p-2 text-center w-max">
+                            <button
+                                onClick={() => setSelectedTournament(tournament)}
+                                className="text-slate-200 font-semibold hover:text-white"
+                            >
+                                {tournament.tournamentName}
+                            </button>
                         </div>
                     ))
                 ) : (
-                    <span className="text-white">No clubs available</span>
+                    <span className="text-white">No tournaments available</span>
                 )}
             </div>
+           
+        </div>
+        {selectedTournament && <Navbar2 selectedTournament={selectedTournament} />} {/* Pass selectedTournament to Navbar2 */}
         </div>
     );
 }

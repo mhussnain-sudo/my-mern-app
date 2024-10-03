@@ -65,9 +65,9 @@ export default function SidebarComponent() {
                 </Sidebar.Item>
 
                 {/* Clubs Dropdown */}
-                <Sidebar.Collapse label={<div className="flex items-center"><SiClubforce className="mr-2 text-blue-700 font-bold" /> Clubs</div>}>
-                  <Sidebar.Item href="/all-clubs">All Clubs</Sidebar.Item>
-                  <Sidebar.Item href="/create-club">Create Club</Sidebar.Item>
+                <Sidebar.Collapse label={<div className="flex items-center"><SiClubforce className="mr-2 text-blue-700 font-bold" /> Members</div>}>
+                  <Sidebar.Item href="/all-members">All Members</Sidebar.Item>
+                  <Sidebar.Item href="/create-members">Create Members</Sidebar.Item>
                 </Sidebar.Collapse>
 
                 {/* Tournaments Dropdown */}
