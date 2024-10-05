@@ -1,6 +1,5 @@
 const mongoose = require("mongoose");
 const Users = require("../models/userModel");
-const Club = require("../models/clubs");
 const Header = require("../models/header");
 const Tournament = require("../models/tournament");
 const Pigeons = require("../models/pigeon");

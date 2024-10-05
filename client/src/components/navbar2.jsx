@@ -1,4 +1,4 @@
-import  { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { getPigeonResult } from '../apis/userApi';
 
@@ -29,7 +29,7 @@ const Navbar2 = ({ selectedTournament }) => {
         const date = new Date(dateString);
         return isNaN(date.getTime())
             ? "Invalid Date"
-            : date.toLocaleDateString(undefined, { year: 'numeric', month: '2-digit', day: '2-digit' });
+            : `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${date.getFullYear()}`;
     };
 
     const calculateDuration = (startTime, returnTime) => {
@@ -115,7 +115,7 @@ const Navbar2 = ({ selectedTournament }) => {
                 </div>
             </div>
 
-            <div className="flex gap-2 my-2">
+            <div className="flex content-center items-center justify-center gap-2 my-2">
                 {uniqueDates.map(date => (
                     <button
                         key={date}
@@ -141,39 +141,42 @@ const Navbar2 = ({ selectedTournament }) => {
             </div>
 
             {Object.keys(participantData).length > 0 && (
-                <div className="mb-4">
-                    <table className="min-w-full border-collapse border text-center border-gray-300">
-                        <thead>
-                            <tr className="bg-black text-white">
-                                <th className="border border-gray-300 p-2">Sr</th>
-                                <th className="border border-gray-300 p-2">Participant</th>
-                                {Array.from({ length: maxPigeons }, (_, i) => (
-                                    <th key={i} className="border border-gray-300 p-2">#{i + 1}</th>
-                                ))}
-                                <th className="border border-gray-300 p-2">Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {Object.entries(participantData).map(([name, data], index) => (
-                                <tr key={name}>
-                                    <td className="border border-gray-300 p-2">{index + 1}</td> {/* Sr. No */}
-                                    <td className="border border-gray-300 p-2">{name}</td>
-                                    {data.pigeons.map(pigeon => (
-                                        <td key={pigeon.pigeonNo} className="border border-gray-300 p-2">
-                                            {pigeon.returnTime}
-                                        </td>
-                                    ))}
-                                    {/* Fill remaining cells if less than max pigeons */}
-                                    {Array.from({ length: maxPigeons - data.pigeons.length }, (_, i) => (
-                                        <td key={i} className="border border-gray-300 p-2"></td>
-                                    ))}
-                                    <td className="border border-gray-300 p-2">{data.totalDuration}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
+    <div className="mb-4">
+        <table className="min-w-full border-collapse border text-center border-gray-300">
+            <thead>
+                <tr className="bg-[#353a3f] text-white text-sm h-[4px]">
+                    <th className="border border-gray-300 p-2">Sr</th>
+                    <th className="border border-gray-300 p-2">Participant</th>
+                    {/* Show pigeon columns only if not showing total results */}
+                    {!showTotal && Array.from({ length: maxPigeons }, (_, i) => (
+                        <th key={i} className="border border-gray-300 p-2">#{i + 1}</th>
+                    ))}
+                    <th className="border border-gray-300 p-2">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {Object.entries(participantData).map(([name, data], index) => (
+                    <tr key={name}>
+                        <td className="border border-gray-300 p-2">{index + 1}</td> {/* Sr. No */}
+                        <td className="border border-gray-300 p-2">{name}</td>
+                        {/* Show pigeon data only if not showing total results */}
+                        {!showTotal && data.pigeons.map(pigeon => (
+                            <td key={pigeon.pigeonNo} className="border border-gray-300 p-2">
+                                {pigeon.returnTime}
+                            </td>
+                        ))}
+                        {/* Fill remaining cells if less than max pigeons, only if not showing total results */}
+                        {!showTotal && Array.from({ length: maxPigeons - data.pigeons.length }, (_, i) => (
+                            <td key={i} className="border border-gray-300 p-2"></td>
+                        ))}
+                        <td className="border border-gray-300 p-2">{data.totalDuration}</td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
+)}
+
         </div>
     );
 };
