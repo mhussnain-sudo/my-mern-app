@@ -13,12 +13,12 @@ export default function CreatePigeonOwners() {
     const [pigeonAvatar, setPigeonAvatar] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [formValues, setFormValues] = useState({
-        tournamentName: '',
         name: '',
         phone: '',
         city: ''
     });
     const [tournaments, setTournaments] = useState([]);
+    const [selectedTournament, setSelectedTournament] = useState(null); // Separate state for selected tournament
 
     useEffect(() => {
         const fetchTournaments = async () => {
@@ -38,8 +38,6 @@ export default function CreatePigeonOwners() {
         fetchTournaments();
     }, []);
 
-
-
     const handleFileChange = (event) => {
         const file = event.target.files[0];
         setPigeonAvatar(file);
@@ -54,21 +52,38 @@ export default function CreatePigeonOwners() {
     };
 
     const handleSubmit = async (formData) => {
-        const completeData = { ...formValues, ...formData, pigeonAvatar };
+        const completeData = { 
+            tournamentName: selectedTournament ? selectedTournament.tournamentName : '', // Use selectedTournament
+            ...formValues, 
+            ...formData, 
+            pigeonAvatar 
+        };
+
+        // If phone is not provided, set it to null
+        if (!completeData.phone) {
+            completeData.phone = null; // or you can use undefined based on your API's requirement
+        }
+
         console.log('Form Data:', completeData);
 
         try {
-            const data = await addPigeonOwner(completeData.tournamentName, completeData.name, completeData.phone, completeData.city, pigeonAvatar);
+            const data = await addPigeonOwner(
+                completeData.tournamentName, 
+                completeData.name, 
+                completeData.phone, 
+                completeData.city, 
+                pigeonAvatar
+            );
             console.log("Pigeon created successfully:", data);
             toast.success("Pigeon added successfully!");
 
-            // Reset form values
+            // Reset form values, including tournamentName
             setFormValues({
-                tournamentName: '',
                 name: '',
                 phone: '',
                 city: '',
             });
+            setSelectedTournament(null); // Reset selected tournament
             setPigeonAvatar(null);
             setAvatarPreview(null);
         } catch (error) {
@@ -108,21 +123,19 @@ export default function CreatePigeonOwners() {
                         options={tournaments}
                         getOptionLabel={(option) => option.tournamentName || ""}
                         onChange={(event, value) => {
-                            setFormValues(prevValues => ({
-                                ...prevValues,
-                                tournamentName: value ? value.tournamentName : ''
-                            }));
+                            setSelectedTournament(value); // Update selected tournament
                         }}
                         renderInput={(params) => (
                             <TextField {...params} label="Enter Tournament" variant="outlined" />
                         )}
                         style={{ width: '100%' }}
+                        value={selectedTournament} // Control the value of Autocomplete
                     />
-     <FormPigeonOwnerComponent
+                    <FormPigeonOwnerComponent
                         onSubmit={handleSubmit}
                         fields={[
                             { name: 'name', type: 'text', placeholder: 'Enter Name' },
-                            { name: 'phone', type: 'text', placeholder: 'Enter Phone' },
+                            { name: 'phone', type: 'text', placeholder: 'Enter Phone (optional)' },
                             { name: 'city', type: 'text', placeholder: 'Enter City' },
                         ]}
                         formValues={formValues}
@@ -133,4 +146,3 @@ export default function CreatePigeonOwners() {
         </div>
     );
 }
-

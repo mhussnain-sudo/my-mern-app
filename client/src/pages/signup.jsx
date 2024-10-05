@@ -18,7 +18,7 @@ const Signup = () => {
         }
     };
     const fields = [
-        { name: 'email', type: 'email', placeholder: 'Email' },
+        { name: 'ID', type: 'text', placeholder: 'ID' },
         { name: 'password', type: 'password', placeholder: 'Password' },
     ];
 

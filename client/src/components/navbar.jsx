@@ -15,6 +15,7 @@ export default function Navbar() {
             try {
                 const data = await getEveryTournament();
                 if (data && data.tournaments) {
+                    console.log('Fetched tournaments:', data.tournaments);
                     setTournaments(data.tournaments);
                 } else {
                     setTournaments([]);
@@ -33,36 +34,35 @@ export default function Navbar() {
 
     return (
         <div className='flex flex-col'>
-        <div className="flex flex-col md:flex-row justify-between bg-blue-800 p-4 gap-1">
-            <div className="flex items-center justify-between px-5 gap-1">
-                <Link className='text-white text-lg' to="/">
-                    <div className="flex justify-center items-center gap-1">
-                        <GrHomeRounded /> Home
-                    </div>
-                </Link>
-                <Link className="text-white text-lg" to="/login">
-                    <div className="flex justify-center items-center"> <BsPerson /> Login </div>
-                </Link>
-            </div>
-            <div className="flex flex-wrap justify-center mt-4 md:mt-0">
-                {tournaments.length > 0 ? (
-                    tournaments.map((tournament) => (
-                        <div key={tournament._id} className="p-2 text-center w-max">
-                            <button
-                                onClick={() => setSelectedTournament(tournament)}
-                                className="text-slate-200 font-semibold hover:text-white"
-                            >
-                                {tournament.tournamentName}
-                            </button>
+            <div className="flex flex-col md:flex-row justify-between bg-blue-800 p-4 gap-1">
+                <div className="flex items-center justify-between px-5 gap-1">
+                    <Link className='text-white text-lg' to="/">
+                        <div className="flex justify-center items-center gap-1">
+                            <GrHomeRounded /> Home
                         </div>
-                    ))
-                ) : (
-                    <span className="text-white">No tournaments available</span>
-                )}
+                    </Link>
+                    <Link className="text-white text-lg" to="/login">
+                        <div className="flex justify-center items-center"> <BsPerson /> Login </div>
+                    </Link>
+                </div>
+                <div className="flex flex-wrap justify-center mt-4 md:mt-0">
+                    {tournaments.length > 0 ? (
+                        tournaments.map((tournament) => (
+                            <div key={tournament._id} className="p-2 text-center w-max">
+                                <button
+                                    onClick={() => setSelectedTournament(tournament)}
+                                    className="text-slate-200 font-semibold hover:text-white"
+                                >
+                                    {tournament.tournamentName}
+                                </button>
+                            </div>
+                        ))
+                    ) : (
+                        <span className="text-white">No tournaments available</span>
+                    )}
+                </div>
             </div>
-           
-        </div>
-        {selectedTournament && <Navbar2 selectedTournament={selectedTournament} />} {/* Pass selectedTournament to Navbar2 */}
+            {selectedTournament && <Navbar2 selectedTournament={selectedTournament} />} {/* Pass selectedTournament to Navbar2 */}
         </div>
     );
 }

@@ -1,4 +1,3 @@
-
 import PropTypes from 'prop-types';
 import Button from '@mui/material/Button';
 import TextField from '@mui/material/TextField';
@@ -26,7 +25,8 @@ const FormPigeonOwnerComponent = ({ onSubmit, fields, formValues, onFormChange }
                     label={field.placeholder}
                     value={formValues[field.name] || ''}
                     onChange={handleChange}
-                    required
+                    // Remove required attribute or conditionally set it
+                    required={field.name === 'name' || field.name === 'city'} // Example: only make name and city required
                     className="w-full sm:w-72 lg:w-80"
                 />
             ))}
@@ -50,4 +50,3 @@ FormPigeonOwnerComponent.propTypes = {
 };
 
 export default FormPigeonOwnerComponent;
-

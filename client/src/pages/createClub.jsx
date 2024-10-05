@@ -2,22 +2,23 @@
 // CreateClub.jsx
 import { useState } from 'react';
 import FormComponent from '../components/form';
-import { addClub } from '../apis/userApi';
+import { addMember } from '../apis/userApi';
 import { IconButton } from '@mui/material';
 import Avatar from '@mui/material/Avatar';
 import PhotoCamera from '@mui/icons-material/PhotoCamera';
 
 export default function CreateClub() {
-    const [clubAvatar, setClubAvatar] = useState(null);
+    const [avatar, setavatar] = useState(null);
     const [avatarPreview, setAvatarPreview] = useState(null);
     const [formValues, setFormValues] = useState({
         ownerName: '',
+        ID: '',
         password: ''
     });
 
     const handleFileChange = (event) => {
         const file = event.target.files[0];
-        setClubAvatar(file);
+        setavatar(file);
         setAvatarPreview(URL.createObjectURL(file));
     };
 
@@ -33,13 +34,14 @@ export default function CreateClub() {
 
         try {
             // eslint-disable-next-line no-unused-vars
-            const data = await addClub( formData.ownerName, formData.password, clubAvatar);
+            const data = await addMember( formData.ownerName,formData.ID, formData.password, avatar);
             // Reset form fields and avatar preview
             setFormValues({
                 ownerName: '',
+                ID: '',
                 password: ''
             });
-            setClubAvatar(null);
+            setavatar(null);
             setAvatarPreview(null);
         } catch (error) {
             console.error("Error creating club:", error);
@@ -77,6 +79,7 @@ export default function CreateClub() {
                         onSubmit={handleSubmit}
                         fields={[
                             { name: 'ownerName', type: 'text', placeholder: 'Enter Member Name', value: formValues.ownerName, onChange: handleInputChange },
+                            { name: 'ID', type: 'text', placeholder: 'Enter ID', value: formValues.ID, onChange: handleInputChange },
                             { name: 'password', type: 'password', placeholder: 'Password', value: formValues.password, onChange: handleInputChange },
                         ]}
                     />

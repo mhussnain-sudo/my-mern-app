@@ -24,7 +24,7 @@ const verifysuperior = async (req, res, next) => {
   try {
       const user = await Users.findById(userId);
 
-      if (user && user.role === "admin" || user.role === "clubowner") {
+      if (user && user.role === "admin" || user.role === "member") {
           next();
       } else {
           return res

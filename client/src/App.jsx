@@ -23,21 +23,21 @@ function App() {
     if (loading) return <div>Loading...</div>; // Show a loading state while checking auth
 
     return (
-        <div className='flex flex-col px-4 gap-3'>
+        <div className='flex flex-col min-w-[768px] md:w-full px-4 gap-3'>
             <Routes>
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/" element={<Home />} />
                 <Route path="/admin-dashboard" element={user && user.role === "admin" ? <AdminLayout><AdminDashboard /></AdminLayout> : <Navigate to="/" />} />
-                <Route path="/clubowner-dashboard" element={user && user.role === "clubowner" ? <AdminLayout><ClubDashboard /></AdminLayout> : <Navigate to="/" />} />
+                <Route path="/clubowner-dashboard" element={user && user.role === "member" ? <AdminLayout><ClubDashboard /></AdminLayout> : <Navigate to="/" />} />
 
                 <Route path="/all-members" element={user && user.role === "admin" ? <AdminLayout><AllClubs /></AdminLayout> : <Navigate to="/" />} />
                 <Route path="/create-members" element={user && user.role === "admin" ? <AdminLayout><CreateClub /></AdminLayout> : <Navigate to="/" />} />
                 <Route path="/all-tournaments" element={user && user.role === "admin" ? <AdminLayout><AllTournaments /></AdminLayout> : <Navigate to="/" />} />
                 <Route path="/create-tournaments" element={user && user.role === "admin" ? <AdminLayout><CreateTournaments /></AdminLayout> : <Navigate to="/" />} />
-                <Route path="/add-PigeonsResult" element={user && (user.role === "admin" || user.role === "clubowner") ? <AdminLayout><AddPigeonsResult /></AdminLayout> : <Navigate to="/" />} />
+                <Route path="/add-PigeonsResult" element={user && (user.role === "admin" || user.role === "member") ? <AdminLayout><AddPigeonsResult /></AdminLayout> : <Navigate to="/" />} />
 
-                <Route path="/create-PigeonsOwners" element={user &&(user.role === "admin" || user.role === "clubowner") ? <AdminLayout><CreatePigeonOwners /></AdminLayout> : <Navigate to="/" />} />
+                <Route path="/create-PigeonsOwners" element={user &&(user.role === "admin" || user.role === "member") ? <AdminLayout><CreatePigeonOwners /></AdminLayout> : <Navigate to="/" />} />
                 <Route path="/all-banners" element={user && user.role === "admin" ? <AdminLayout><AllBanners /></AdminLayout> : <Navigate to="/" />} />
                 <Route path="/create-banners" element={user && user.role === "admin" ? <AdminLayout><CreateBanners /></AdminLayout> : <Navigate to="/" />} />
             </Routes>

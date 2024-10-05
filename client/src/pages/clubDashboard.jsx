@@ -5,7 +5,7 @@ const ClubDashboard = () => {
 
     return(
         <div>
-       <h1>Club dashboard</h1>
+       <h1>Member dashboard</h1>
 
       </div>
     )

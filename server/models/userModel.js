@@ -2,22 +2,24 @@ const mongoose = require("mongoose");
 const { Schema } = mongoose;
 
 const userSchema = new Schema({
-  
     role: {
         type: String,
-        enum: ["clubowner", "admin"],
-        default: null,
+        enum: ["member", "admin"],
+        default: 'member',
     },
-    email: {
+    ID: {
         type: String,
         unique: true
     },
     password: {
         type: String
     },
-    name: {
+    ownerName: {
         type: String
     },
+    avatar:{
+        type: String,
+    }
 }, { timestamps: true });
 
 const Users = mongoose.model("users", userSchema);

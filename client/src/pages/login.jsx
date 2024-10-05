@@ -5,13 +5,13 @@ import FormComponent from '../components/form';
 const Login = () => {
     const { loginUser } = useAuth();
 
-    const handleSubmit = ({ email, password }) => {
-        loginUser(email, password);
+    const handleSubmit = ({ ID, password }) => {
+        loginUser(ID, password);
     };
     
 
     const fields = [
-        { name: 'email', type: 'text', placeholder: 'Name' },
+        { name: 'ID', type: 'text', placeholder: 'ID' },
         { name: 'password', type: 'password', placeholder: 'Password' },
     ];
 

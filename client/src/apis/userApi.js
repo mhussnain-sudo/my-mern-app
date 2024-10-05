@@ -8,9 +8,9 @@ export const setrole = async(role)=>{
 }
 
 
-  export const login = async (email, password) => {
+  export const login = async (ID, password) => {
    console.log('login api hit')
-    return await api.post('/users/login', { email, password });
+    return await api.post('/users/login', { ID, password });
 };
 
 export const signup = async (userData) => {
@@ -66,9 +66,9 @@ export const getheaders = async () => {
     }
   };
   
-  export const getAllClubs = async (page = 1, limit = 10) => {
+  export const getAllMembers = async (page = 1, limit = 10) => {
     try {
-        const response = await api.get(`/users/all-Clubs?page=${page}&limit=${limit}`);
+        const response = await api.get(`/users/all-members?page=${page}&limit=${limit}`);
         return response.data; // Ensure your API returns { clubs: [], totalPages: number }
     } catch (error) {
         throw error.response.data;
@@ -82,17 +82,18 @@ export const getheaders = async () => {
           throw error.response.data;
       }
   };
-  export const addClub = async (ownerName, password, clubAvatar) => {
+  export const addMember = async (ownerName,ID, password, avatar) => {
     try {
         const token = localStorage.getItem('token');
         const formData = new FormData(); // Create a FormData object
         formData.append('ownerName', ownerName);
+        formData.append('ID',ID);
         formData.append('password', password);
-        if (clubAvatar) {
-            formData.append('clubAvatar', clubAvatar); // Append the avatar file
+        if (avatar) {
+            formData.append('avatar', avatar); // Append the avatar file
         }
   
-        const response = await api.post('/users/add-Club', formData, {
+        const response = await api.post('/users/add-members', formData, {
             headers: {
                 Authorization: `Bearer ${token}`,
                 'Content-Type': 'multipart/form-data' // Set content type for FormData

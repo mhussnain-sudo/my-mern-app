@@ -11,7 +11,11 @@ const pigeonResultSchema = new Schema({
         type: String,
         required: true, // Ensuring this field is required
         default:'-'
-    }
+    },
+    member:{
+        type: Schema.Types.ObjectId,
+        ref: 'Tournament' // Reference to the member model
+    },
 }, { _id: false }); // Disable automatic ID generation for nested schema
 
 const dailyResultsSchema = new Schema({
@@ -39,6 +43,7 @@ const pigeonSchema = new Schema({
         type: Number, // Change this to Number type for numeric operations
         required: true // Optional: Set to true if you want to enforce this field
     },
+  
     pigeonResults: [dailyResultsSchema], // Changed to an array of dailyResultsSchema
 }, { timestamps: true });
 

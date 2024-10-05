@@ -32,16 +32,16 @@ const role = async (req, res) => {
 //STEP 2 : register user
 const registerUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { ID, password } = req.body;
     const role = getRole();
 
-    const existingUser = await Users.findOne({ email });
+    const existingUser = await Users.findOne({ ID });
     if (existingUser) {
-      throw new Error("User with this email already exists");
+      throw new Error("User with this ID already exists");
     }
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(password, salt);
-    const newUser = new Users({ role, email, password: hashPassword });
+    const newUser = new Users({ role, ID, password: hashPassword });
     await newUser.save();
     clearRole();
     res.status(200).json({ message: "Signup Successfully", type: "success" });
@@ -51,39 +51,43 @@ const registerUser = async (req, res) => {
 };
 //STEP 3 : login user
 const loginUser = async (req, res) => {
-  console.log("login working at back")
- try {
-      const { email, password } = req.body;
-     console.log(req.body);
-      const user = await Users.findOne({ email });
+  console.log("login working at back");
+  try {
+    const { ID, password } = req.body;
+    const user = await Users.findOne({ ID });
 
-      if (!user) {
-          return res.status(401).json({ message: "Email incorrect", type: "error" });
+    if (!user) {
+      return res.status(401).json({ message: "ID incorrect", type: "error" });
+    }
+
+    // Check if user is a member
+    if (user.role === "member") {
+      // Directly compare the input password with the stored password
+      if (password !== user.password) {
+        return res.status(401).json({ message: "Password incorrect", type: "error" });
       }
-
-      // Await the password comparison
+    } else {
+      // For other roles, check hashed password
       const isPasswordValid = await bcrypt.compare(password, user.password);
       if (!isPasswordValid) {
-          return res.status(401).json({ message: "Password incorrect", type: "error" });
+        return res.status(401).json({ message: "Password incorrect", type: "error" });
       }
+    }
 
-      if (user.status === "inactive") {
-          return res.status(403).json({ message: "Account is deactivated", type: "error" });
-      }
+    const token = jwt.sign({ userId: user._id, role: user.role }, secretKey);
+    const { password: _, ...userDetails } = user.toObject(); // Remove the password field
 
-      const token = jwt.sign({ userId: user._id, role: user.role }, secretKey);
-      const { password: _, ...userDetails } = user.toObject(); // Remove the password field
-
-      res.status(200).json({
-          message: "Login Successful",
-          type: "success",
-          token,
-          user: userDetails
-      });
+    res.status(200).json({
+      message: "Login Successful",
+      type: "success",
+      token,
+      user: userDetails,
+    });
   } catch (error) {
-      res.status(500).json({ message: error.message, type: "error" });
+    res.status(500).json({ message: error.message, type: "error" });
   }
 };
+
 
 // logout user
 const logoutUser = async (req, res) => {
@@ -118,14 +122,15 @@ const userProfile = async (req, res) => {
       return res.status(404).json({ error: "User not found", type: "error" });
     }
 
-    if (user.role === "viewer") {
+    if (user.role === "member") {
       res.status(200).json({
-        email: user.email,
+        role: user.role,
+        ID: user.ID,
       });
     } else if (user.role === "admin") {
       res.status(200).json({
         role:user.role,
-        email: user.email,
+        ID: user.ID,
       });
     }
   } catch (error) {
@@ -194,42 +199,41 @@ const getheader = async (req, res) => {
 };
 
 // Add Clubs
-const addClub = async (req, res) => {
+const addMember = async (req, res) => {
   const userId = req.userId;
 
   try {
     const existingUser = await Users.findById(userId);
-    if (!existingUser) {
-      return res.status(404).json({ message: "User not found", type: "error" });
-    }
 
     // Check if user is an admin
     if (existingUser.role !== "admin") {
       return res.status(403).json({ message: "Unauthorized", type: "error" });
     }
 
-    const { ownerName, password } = req.body;
+    const { ownerName,ID, password } = req.body;
 
 
 
     // Create a new club
-    const newClub = new Club({
+    const newMember = new Users({
       ownerName,
+      ID,
       password,
-      clubAvatar: req.file ? `clubAvatar/${req.file.filename}` : null, // Save the filename from multer
+      avatar: req.file ? `avatar/${req.file.filename}` : null, // Save the filename from multer
     });
 
     // Save the new club to the database
-    await newClub.save();
+    await newMember.save();
 
-    res.status(201).json({ message: "Member added successfully", type: "success", club: newClub });
+    res.status(201).json({ message: "Member added successfully", type: "success", Member: newMember });
   } catch (error) {
     res.status(500).json({ error: error.message, type: "error" });
   }
 };
 
-//Get All Clubs
-const getAllClubs = async (req, res) => {
+
+// Get All Members
+const getAllMembers = async (req, res) => {
   try {
       const { page = 1, limit = 15 } = req.query;
 
@@ -237,32 +241,32 @@ const getAllClubs = async (req, res) => {
       const limitNumber = parseInt(limit);
       const skip = (pageNumber - 1) * limitNumber;
 
-      // Fetch clubs with pagination
-      const clubs = await Club.find()
+      // Fetch members (excluding admins) with pagination
+      const members = await Users.find({ role: 'member' }) // Filter out admins
         .skip(skip)
         .limit(limitNumber)
-        .select('_id ownerName  password clubAvatar');
+        .select(`ID ownerName password avatar`);
 
-      const totalClubs = await Club.countDocuments();
+      const totalMembers = await Users.countDocuments({ role:'member' }); // Count only non-admin members
 
-      if (clubs.length === 0) {
+      if (members.length === 0) {
           return res.status(404).json({ message: "No Member found", type: "info" });
       }
 
-      // Map over clubs to add public prefix to clubAvatar
-      const clubsWithAvatar = clubs.map(club => ({
-          ...club.toObject(), // Convert mongoose document to plain object
-          clubAvatar: club.clubAvatar ? `/public/${club.clubAvatar}` : null, // Add prefix
+      // Map over members to add public prefix to avatar
+      const membersWithAvatar = members.map(member => ({
+          ...member.toObject(), // Convert mongoose document to plain object
+          Avatar: member.avatar ? `/public/${member.avatar}` : null, // Add prefix
       }));
 
       res.status(200).json({
           message: "Members retrieved successfully",
           type: "success",
           data: {
-              clubs: clubsWithAvatar,
+              members: membersWithAvatar,
               currentPage: pageNumber,
-              totalPages: Math.ceil(totalClubs / limitNumber),
-              totalItems: totalClubs,
+              totalPages: Math.ceil(totalMembers / limitNumber),
+              totalItems: totalMembers,
           }
       });
   } catch (error) {
@@ -270,35 +274,6 @@ const getAllClubs = async (req, res) => {
   }
 };
 
-const getClubs = async (req, res) => {
-  try {
-      // Fetch clubs with pagination
-      const clubs = await Club.find()
-
-
-      const totalClubs = await Club.countDocuments();
-
-      if (clubs.length === 0) {
-          return res.status(404).json({ message: "No clubs found", type: "info" });
-      }
-
-      // Map over clubs to add public prefix to clubAvatar
-      const clubsWithAvatar = clubs.map(club => ({
-          ...club.toObject(), // Convert mongoose document to plain object
-          clubAvatar: club.clubAvatar ? `/public/${club.clubAvatar}` : null, // Add prefix
-      }));
-
-      res.status(200).json({
-          message: "Clubs retrieved successfully",
-          type: "success",
-          data: {
-              clubs: clubsWithAvatar,
-          }
-      });
-  } catch (error) {
-      res.status(500).json({ error: error.message, type: "error" });
-  }
-};
 const addTournament = async (req, res) => {
   try {
       const {
@@ -464,9 +439,10 @@ const addPigeon = async (req, res) => {
     const pigeonAvatar = req.file ? `pigeonAvatar/${req.file.filename}` : null;
 
     // Validate required fields
-    if (!tournamentName || !name || !phone || !city) {
+    if (!tournamentName || !name || !city) {
       return res.status(400).json({ message: "All fields are required", type: "error" });
     }
+    
 
     // Check if the tournament exists
     const tournament = await Tournament.findOne({ tournamentName });
@@ -510,47 +486,67 @@ res.status(500).json({ error: error.message, type: "error" });
 
 
 const addPigeonResult = async (req, res) => {
-  const { tournamentName, name, startTime, numberOfPigeons, pigeonResults } = req.body;
+  const { tournamentName, name,startTime,numberOfPigeons, pigeonResults } = req.body; // Removed unused parameters
 
-  // Validate the request data
-  if (!tournamentName || !name || !startTime || !numberOfPigeons || !pigeonResults) {
-      return res.status(400).json({
-          success: false,
-          message: "Please provide all required fields"
-      });
+  if (!tournamentName || !name || !pigeonResults) {
+    return res.status(400).json({
+      success: false,
+      message: "Please provide all required fields"
+    });
   }
 
-  // Ensure pigeonResults is formatted correctly
-  const formattedResults = pigeonResults.map(item => ({
-      date: item.date,
-      results: item.results // Assuming results is already structured correctly
-  }));
+  try {
+    // Fetch the tournament using the tournamentName
+    const tournament = await Tournament.findOne({ tournamentName });
+    if (!tournament) {
+      return res.status(404).json({
+        success: false,
+        message: "Tournament not found"
+      });
+    }
 
-  const newPigeon = new PigeonsResults({
+    const participant = tournament.participants.find(part => part.userName === name);
+    if (!participant) {
+      return res.status(404).json({
+        success: false,
+        message: `Participant ${name} not found in tournament`
+      });
+    }
+
+    // Ensure pigeonResults is formatted correctly and include member ID
+    const formattedResults = pigeonResults.map(item => ({
+      date: item.date,
+      results: item.results.map(res => ({
+        ...res,
+        member: participant.member // Add the member ID here
+      }))
+    }));
+
+    const newPigeon = new PigeonsResults({
       tournamentName,
       name,
       startTime,
       numberOfPigeons,
-      pigeonResults: formattedResults
-  });
 
-  try {
-      const savedPigeon = await newPigeon.save();
-      res.status(201).json({
-          success: true,
-          data: savedPigeon
-      });
+      pigeonResults: formattedResults
+    });
+
+    console.log("New pigeon object before save:", newPigeon);
+
+    const savedPigeon = await newPigeon.save();
+    res.status(201).json({
+      success: true,
+      data: savedPigeon
+    });
   } catch (error) {
-      console.error("Error creating pigeon:", error);
-      if (error.name === 'ValidationError') {
-          console.error("Validation errors:", error.errors);
-      }
-      res.status(500).json({
-          success: false,
-          message: "Server error"
-      });
+    console.error("Error creating pigeon:", error);
+    res.status(500).json({
+      success: false,
+      message: error.message || "Server error"
+    });
   }
 };
+
 
 
 const getPigeonResult = async (req,res)=>{
@@ -573,9 +569,8 @@ module.exports = {
   userProfile,
   header,
   getheader,
-  addClub,
-  getAllClubs,
-  getClubs,
+  addMember,
+  getAllMembers,
   addTournament,
   getAllTournaments,
   getEveryTournaments,

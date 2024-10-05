@@ -5,7 +5,7 @@ const { v4: uuidv4 } = require("uuid");
 // Define allowed mime types for each file type
 const allowedMimeTypes = {
   banners: ["image/jpeg", "image/png"],
-  clubAvatar: ["image/jpeg", "image/png"],
+  avatar: ["image/jpeg", "image/png"],
   tournamentImage: ["image/jpeg", "image/png"],
   pigeonAvatar: ["image/jpeg", "image/png"],
 };
@@ -19,8 +19,8 @@ const storage = multer.diskStorage({
       case "banners":
         destinationPath = `./public/banners/`;
         break;
-        case "clubAvatar":
-          destinationPath = `./public/clubAvatar/`;
+        case "avatar":
+          destinationPath = `./public/avatar/`;
           break;
         case "tournamentImage":
           destinationPath = `./public/tournamentImage/`;
@@ -68,7 +68,7 @@ const upload = multer({
 
 // Change to allow multiple file uploads
 const uploadMultiple = upload.array("banners", 5); 
-const uploadclubAvatar = upload.single("clubAvatar");
+const uploadAvatar = upload.single("avatar");
 const uploadtournamentImage = upload.single("tournamentImage");
 const uploadPigeonAvatar = upload.single("pigeonAvatar");
-module.exports = {uploadMultiple,uploadclubAvatar,uploadtournamentImage,uploadPigeonAvatar};
+module.exports = {uploadMultiple,uploadAvatar,uploadtournamentImage,uploadPigeonAvatar};

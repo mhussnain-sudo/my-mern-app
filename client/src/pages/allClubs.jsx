@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import TableBox from "../components/tableBox";
-import { getAllClubs, deleteClub } from '../apis/userApi';
+import { getAllMembers, deleteClub } from '../apis/userApi';
 import Pagination from '../components/pagination';
 
 export default function AllClubs() {
@@ -13,11 +13,11 @@ export default function AllClubs() {
     const fetchClubs = async (page = 1) => {
         setLoading(true);
         try {
-            const response = await getAllClubs(page);
-            setData(response.data.clubs);
+            const response = await getAllMembers(page);
+            setData(response.data.members);
             setTotalPages(response.data.totalPages);
         } catch (error) {
-            console.error("Error fetching clubs:", error);
+            console.error("Error fetching :", error);
         } finally {
             setLoading(false);
         }
@@ -60,7 +60,7 @@ export default function AllClubs() {
                             onDelete={handleDelete}
                         />
                     ) : (
-                        <p>No clubs found.</p>
+                        <p>No Member found.</p>
                     )}
                     <Pagination
                         currentPage={currentPage}

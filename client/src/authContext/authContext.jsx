@@ -30,7 +30,7 @@ export const AuthProvider = ({ children }) => {
                 setUser({ id: user._id, role: user.role });
                if(user.role === "admin") {
                     navigate('/admin-dashboard'); 
-               }else if(user.role === "clubowner"){
+               }else if(user.role === "member"){
                      navigate('/clubowner-dashboard'); 
                }else{
                  navigate('/');
